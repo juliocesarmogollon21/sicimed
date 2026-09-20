@@ -169,24 +169,10 @@ sicimed/
       configuracion/       hub + sedes, especialidades, medicos, usuarios, medicamentos
       dashboard/
 ```
-
 ---
 
-## Problemas frecuentes
+## Propietario
 
-| Síntoma | Qué revisar |
-|---------|-------------|
-| 404 / “Powered by Jetty” | Otro servidor en 8080; usa Tomcat y el WAR en `webapps` |
-| Error de conexión SQL / SSL | TCP 1433 activo; `trustServerCertificate=true`; usuario `sicimed` |
-| `time` vs `datetime` | Ya corregido en el código actual; actualiza el repo |
-| `npm` / Rollup falla en Windows | Borra `node_modules` y `package-lock.json`, vuelve a `npm install` en ruta corta |
-| Admin desactivado y no entra | En SSMS: `UPDATE usuarios SET activo=1 WHERE username='admin'` |
-| Frontend no llama al API | Revisa `environment.ts` y CORS (el backend ya tiene CorsFilter) |
-
----
-
-## Integrantes (Grupo 3)
-
-Isaac Anderson Ballena Perez · Angel Jefferson Diaz Leyva · Julio Cesar Mogollon Carranza · Steven Edson Francesscoly Suclupe Vela  
+Julio Cesar Mogollon Carranza
 
 Docente: Víctor Alfredo Muguerza Capristan
