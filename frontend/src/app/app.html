@@ -1,0 +1,58 @@
+<div class="app-shell" [class.app-logged]="auth.isLoggedIn()" [class.app-public]="!auth.isLoggedIn()">
+  <aside class="app-sidebar" *ngIf="auth.isLoggedIn()">
+    <div class="sidebar-brand">
+      <span class="brand-mark">+</span>
+      <div>
+        <div class="fw-semibold">SICIMED</div>
+        <div class="sidebar-sub">San Rafael</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+      <a routerLink="/citas" routerLinkActive="active"
+         *ngIf="auth.hasRole('ADMIN','RECEPCIONISTA','PACIENTE','MEDICO')">Citas</a>
+      <a routerLink="/nueva-cita" routerLinkActive="active"
+         *ngIf="auth.hasRole('ADMIN','RECEPCIONISTA','PACIENTE')">Nueva cita</a>
+      <a routerLink="/agenda-medico" routerLinkActive="active"
+         *ngIf="auth.hasRole('ADMIN','MEDICO')">Agenda</a>
+      <a routerLink="/admin" routerLinkActive="active"
+         *ngIf="auth.hasRole('ADMIN')">Configuración</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="small text-white-50 mb-2">{{ auth.session()?.nombreCompleto }}</div>
+      <div class="small mb-3 opacity-75">{{ auth.rol() }}</div>
+      <button class="btn btn-sm btn-outline-light w-100" (click)="logout()">Salir</button>
+    </div>
+  </aside>
+
+  <div class="app-main">
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-health d-lg-none" *ngIf="auth.isLoggedIn()">
+      <div class="container-fluid">
+        <a class="navbar-brand fw-semibold d-flex align-items-center gap-2" routerLink="/dashboard">
+          <span class="brand-mark">+</span> SICIMED
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navSicimed">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navSicimed">
+          <div class="navbar-nav ms-auto gap-1">
+            <a class="nav-link" routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+            <a class="nav-link" routerLink="/citas" routerLinkActive="active"
+               *ngIf="auth.hasRole('ADMIN','RECEPCIONISTA','PACIENTE','MEDICO')">Citas</a>
+            <a class="nav-link" routerLink="/nueva-cita" routerLinkActive="active"
+               *ngIf="auth.hasRole('ADMIN','RECEPCIONISTA','PACIENTE')">Nueva cita</a>
+            <a class="nav-link" routerLink="/agenda-medico" routerLinkActive="active"
+               *ngIf="auth.hasRole('ADMIN','MEDICO')">Agenda</a>
+            <a class="nav-link" routerLink="/admin" routerLinkActive="active"
+               *ngIf="auth.hasRole('ADMIN')">Configuración</a>
+            <button class="btn btn-sm btn-outline-light mt-2" (click)="logout()">Salir</button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main class="content-area">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

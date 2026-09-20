@@ -1,0 +1,19 @@
+<div class="container py-4 cfg-page">
+  <div class="mb-3">
+    <h2 class="mb-1 text-teal">Configuración</h2>
+    <p class="text-muted mb-0">Submódulos administrativos · solo rol ADMIN</p>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-md-4" *ngFor="let c of hubCards">
+      <a class="card card-action shadow-sm w-100 text-start hub-tile text-decoration-none"
+         [routerLink]="['/admin', c.path]">
+        <div class="card-body">
+          <div class="fs-3 mb-2">{{ c.icon }}</div>
+          <h5 class="card-title text-teal mb-1">{{ c.title }}</h5>
+          <p class="card-text text-muted small mb-0">{{ c.desc }}</p>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,68 @@
+﻿<div class="container py-4" style="max-width:640px">
+  <h2 class="mb-3 text-teal">Reprogramar cita</h2>
+  <p class="text-muted small" *ngIf="auth.hasRole('PACIENTE')">Cambia fecha, hora, sede o médico de tu cita pendiente.</p>
+  <p class="text-muted small" *ngIf="esRecepcion">Puedes reasignar médico/sede/horario (e incluso paciente por DNI).</p>
+
+  <div *ngIf="cargando" class="text-muted">Cargando…</div>
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+  <div *ngIf="ok" class="alert alert-success">{{ ok }}</div>
+
+  <form *ngIf="!cargando && citaId" (ngSubmit)="guardar()" class="card card-body shadow-sm border-0">
+    <div class="mb-3" *ngIf="esRecepcion">
+      <label class="form-label">Paciente actual</label>
+      <input class="form-control mb-2" [value]="pacienteNombre + ' (id ' + pacienteId + ')'" disabled>
+      <label class="form-label">Reasignar por DNI (opcional)</label>
+      <div class="input-group">
+        <input class="form-control" [(ngModel)]="dniBusqueda" name="dniBusqueda" placeholder="DNI">
+        <button type="button" class="btn btn-outline-success" (click)="buscarPaciente()">Buscar</button>
+      </div>
+    </div>
+    <div class="mb-3" *ngIf="!esRecepcion">
+      <label class="form-label">Paciente</label>
+      <input class="form-control" [value]="pacienteNombre" disabled>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Sede</label>
+      <select class="form-select" [(ngModel)]="sedeId" name="sedeId" (ngModelChange)="onFiltroChange()" required>
+        <option [ngValue]="null">Seleccione...</option>
+        <option *ngFor="let s of sedes" [ngValue]="s.id">{{ s.nombre }}</option>
+      </select>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Especialidad</label>
+      <select class="form-select" [(ngModel)]="especialidadId" name="especialidadId" (ngModelChange)="onFiltroChange()">
+        <option [ngValue]="null">Todas / seleccione...</option>
+        <option *ngFor="let e of especialidades" [ngValue]="e.id">{{ e.nombre }}</option>
+      </select>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Médico</label>
+      <select class="form-select" [(ngModel)]="medicoId" name="medicoId" (ngModelChange)="onFechaMedicoChange()" required>
+        <option [ngValue]="null">Seleccione...</option>
+        <option *ngFor="let m of medicos" [ngValue]="m.id">{{ m.nombreCompleto }} ({{ m.especialidadNombre }})</option>
+      </select>
+    </div>
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Nueva fecha</label>
+        <input type="date" class="form-control" [(ngModel)]="fecha" name="fecha" (ngModelChange)="onFechaMedicoChange()" required>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Nueva hora</label>
+        <select class="form-select" [(ngModel)]="hora" name="hora" required>
+          <option value="">Seleccione...</option>
+          <option *ngFor="let h of horas" [value]="h">{{ h }}</option>
+        </select>
+      </div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Motivo</label>
+      <textarea class="form-control" rows="2" [(ngModel)]="motivo" name="motivo"></textarea>
+    </div>
+    <div class="d-flex gap-2">
+      <button class="btn btn-teal" type="submit">Guardar reprogramación</button>
+      <a routerLink="/citas" class="btn btn-outline-secondary">Volver</a>
+    </div>
+  </form>
+</div>

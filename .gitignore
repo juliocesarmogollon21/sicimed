@@ -1,0 +1,31 @@
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/.vscode/
+*.log
+npm-debug.log*
+
+# Backend
+backend/target/
+backend/.idea/
+*.class
+*.war
+*.jar
+!backend/**/pom.xml
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+*.iml
+.idea/
+.vscode/
+*.swp
+
+# Local / temp
+*.tmp
+*.bak
+sicimed-config-refactor.zip
+
+# Credenciales locales (no publicar)
+backend/src/main/resources/db.properties

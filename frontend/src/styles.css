@@ -1,0 +1,204 @@
+@import 'bootstrap/dist/css/bootstrap.min.css';
+
+:root {
+  --sicimed-teal: #0d9488;
+  --sicimed-teal-dark: #0f766e;
+  --sicimed-sky: #e0f2f1;
+  --sicimed-mist: #f0fdfa;
+}
+
+html, body {
+  height: 100%;
+}
+body {
+  background:
+    radial-gradient(1200px 500px at 10% -10%, rgba(45, 212, 191, 0.18), transparent 60%),
+    radial-gradient(900px 420px at 100% 0%, rgba(14, 165, 233, 0.12), transparent 55%),
+    linear-gradient(180deg, var(--sicimed-mist) 0%, #f8fafc 280px, #f8fafc 100%);
+  min-height: 100vh;
+  color: #0f172a;
+}
+
+.navbar-health {
+  background: linear-gradient(90deg, #0f766e, #0d9488 55%, #14b8a6) !important;
+  box-shadow: 0 2px 12px rgba(13, 148, 136, 0.25);
+}
+
+.brand-mark {
+  display: inline-flex;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--sicimed-teal-dark);
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.text-teal { color: var(--sicimed-teal-dark) !important; }
+.link-teal { color: var(--sicimed-teal-dark); text-decoration: none; }
+.link-teal:hover { color: var(--sicimed-teal); text-decoration: underline; }
+
+.btn-teal {
+  background: var(--sicimed-teal);
+  border-color: var(--sicimed-teal);
+  color: #fff;
+}
+.btn-teal:hover,
+.btn-teal:focus {
+  background: var(--sicimed-teal-dark);
+  border-color: var(--sicimed-teal-dark);
+  color: #fff;
+}
+
+.hero-health {
+  border-radius: 1rem;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(15, 118, 110, 0.08);
+}
+
+.hero-health img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.card-action {
+  transition: transform .15s ease, box-shadow .15s ease;
+  border: 0;
+  background: #fff;
+}
+.card-action:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(15, 118, 110, 0.12);
+}
+
+/* Auth split (login / registro) */
+.auth-split {
+  min-height: 100dvh; height: 100dvh;
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 992px) {
+  .auth-split {
+    grid-template-columns: 1.1fr 0.9fr;
+    min-height: 100dvh; height: 100dvh;
+  }
+}
+
+.auth-hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-hero img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.auth-hero-overlay {
+  position: relative;
+  z-index: 1;
+  margin-top: auto;
+  padding: 2.5rem;
+  color: #fff;
+  background: linear-gradient(180deg, transparent 0%, rgba(15, 118, 110, 0.88) 70%);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 100%;
+}
+
+.auth-hero-overlay h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+
+.auth-hero-overlay p {
+  max-width: 28rem;
+  opacity: 0.95;
+  margin-bottom: 0;
+}
+
+.badge-pill {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+  width: fit-content;
+}
+
+.auth-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.25rem;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 1.25rem;
+  padding: 1.75rem;
+  box-shadow: 0 16px 40px rgba(15, 118, 110, 0.12);
+  border: 1px solid rgba(13, 148, 136, 0.1);
+}
+
+.form-control:focus {
+  border-color: #5eead4;
+  box-shadow: 0 0 0 0.2rem rgba(13, 148, 136, 0.2);
+}
+
+
+/* ===== Calendario / timeline citas (utilidades globales) ===== */
+.slot-pendiente,
+.cal-estado-pendiente {
+  background: #fffbeb !important;
+  border-color: #f59e0b !important;
+}
+.slot-atendido,
+.cal-estado-atendido {
+  background: #f0fdf4 !important;
+  border-color: #22c55e !important;
+}
+.slot-cancelado,
+.cal-estado-cancelado {
+  background: #f1f5f9 !important;
+  border-color: #94a3b8 !important;
+}
+.slot-libre,
+.cal-estado-libre {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+.btn-outline-teal {
+  color: #0f766e;
+  border-color: #0d9488;
+  background: #fff;
+}
+.btn-outline-teal:hover,
+.btn-outline-teal:focus {
+  color: #fff;
+  background: #0d9488;
+  border-color: #0d9488;
+}

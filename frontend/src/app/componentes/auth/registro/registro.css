@@ -1,0 +1,21 @@
+﻿.registro-page.auth-split {
+  min-height: 100dvh;
+  height: 100dvh;
+  overflow: hidden;
+}
+.registro-page .auth-hero {
+  height: 100%;
+}
+.registro-page .auth-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.registro-page .auth-panel {
+  height: 100%;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.registro-page .auth-card { max-width: 480px; }

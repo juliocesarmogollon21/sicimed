@@ -1,0 +1,74 @@
+<div class="container py-4 cfg-page">
+  <div class="cfg-topbar">
+    <div>
+      <a routerLink="/admin" class="btn btn-outline-teal btn-sm mb-2">← Volver al menú</a>
+      <h2 class="mb-0 text-teal">Sedes</h2>
+      <p class="text-muted small mb-0">Locales del policlínico</p>
+    </div>
+    <button type="button" class="btn btn-teal" (click)="abrirNuevo()">+ Nueva sede</button>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+  <div *ngIf="mensaje" class="alert alert-success">{{ mensaje }}</div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <table class="table table-sm table-hover align-middle mb-0">
+        <thead>
+          <tr><th>Nombre</th><th>Dirección</th><th>Teléfono</th><th>Estado</th><th></th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of sedes">
+            <td>{{ s.nombre }}</td>
+            <td>{{ s.direccion }}</td>
+            <td>{{ s.telefono }}</td>
+            <td>
+              <span [class]="s.activo ? 'cfg-badge-activo' : 'cfg-badge-inactivo'">
+                {{ s.activo ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+            <td class="text-end text-nowrap">
+              <button class="btn btn-outline-primary btn-sm me-1" (click)="editar(s)">Editar</button>
+              <button *ngIf="s.activo" class="btn btn-outline-danger btn-sm" (click)="desactivar(s)">Desactivar</button>
+              <button *ngIf="!s.activo" class="btn btn-outline-success btn-sm" (click)="activar(s)">Activar</button>
+            </td>
+          </tr>
+          <tr *ngIf="sedes.length===0">
+            <td colspan="5" class="text-muted text-center">Sin sedes registradas</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="cfg-backdrop" *ngIf="modalOpen" (click)="cerrar()">
+    <div class="cfg-modal" (click)="$event.stopPropagation()">
+      <div class="cfg-modal-header">
+        <h5 class="mb-0 text-teal">{{ form.id ? 'Editar sede' : 'Nueva sede' }}</h5>
+        <button type="button" class="btn-close" (click)="cerrar()"></button>
+      </div>
+      <div class="cfg-modal-body">
+        <div class="mb-3">
+          <label class="form-label">Nombre</label>
+          <input class="form-control" [(ngModel)]="form.nombre" name="sn">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Dirección</label>
+          <input class="form-control" [(ngModel)]="form.direccion" name="sd">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Teléfono</label>
+          <input class="form-control" [(ngModel)]="form.telefono" name="st">
+        </div>
+        <div class="form-check" *ngIf="form.id">
+          <input class="form-check-input" type="checkbox" [(ngModel)]="form.activo" name="sa" id="sedeActivo">
+          <label class="form-check-label" for="sedeActivo">Activo</label>
+        </div>
+      </div>
+      <div class="cfg-modal-footer">
+        <button type="button" class="btn btn-outline-secondary" (click)="cerrar()">Cancelar</button>
+        <button type="button" class="btn btn-teal" (click)="guardar()">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>

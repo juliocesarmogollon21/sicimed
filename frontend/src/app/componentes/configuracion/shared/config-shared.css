@@ -1,0 +1,69 @@
+/* Shared Configuración styles */
+.hub-tile, .hub-card {
+  border: 0;
+  border-radius: 1rem;
+  transition: transform .15s ease, box-shadow .15s ease;
+  background: #fff;
+}
+.hub-tile:hover, .hub-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(15, 118, 110, 0.14);
+}
+.cfg-page .text-teal { color: #0f766e !important; }
+.cfg-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin-bottom: 1rem;
+}
+.cfg-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, .45);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.cfg-modal {
+  background: #fff;
+  border-radius: 1rem;
+  width: min(560px, 100%);
+  max-height: 90vh;
+  overflow: auto;
+  box-shadow: 0 20px 50px rgba(0,0,0,.2);
+}
+.cfg-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+.cfg-modal-body { padding: 1.25rem; }
+.cfg-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: .5rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid #e2e8f0;
+}
+.cfg-badge-activo {
+  background: #ccfbf1;
+  color: #0f766e;
+  font-weight: 600;
+  padding: .2rem .55rem;
+  border-radius: 999px;
+  font-size: .75rem;
+}
+.cfg-badge-inactivo {
+  background: #fee2e2;
+  color: #b91c1c;
+  font-weight: 600;
+  padding: .2rem .55rem;
+  border-radius: 999px;
+  font-size: .75rem;
+}

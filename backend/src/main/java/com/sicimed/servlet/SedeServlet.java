@@ -1,0 +1,97 @@
+package com.sicimed.servlet;
+
+import com.sicimed.dao.SedeDao;
+import com.sicimed.model.Rol;
+import com.sicimed.model.Sede;
+import com.sicimed.util.AuthUtil;
+import com.sicimed.util.JsonUtil;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+import java.util.Map;
+
+@WebServlet("/api/sedes")
+public class SedeServlet extends HttpServlet {
+
+    private final SedeDao sedeDao = new SedeDao();
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        try {
+            boolean all = "1".equals(request.getParameter("all")) || "true".equalsIgnoreCase(request.getParameter("all"));
+            if (all) {
+                AuthUtil.requireRole(request, Rol.ADMIN);
+                JsonUtil.writeJson(response, 200, sedeDao.findAll());
+            } else {
+                JsonUtil.writeJson(response, 200, sedeDao.findActivas());
+            }
+        } catch (SecurityException e) {
+            JsonUtil.writeError(response, 403, e.getMessage());
+        } catch (Exception e) {
+            JsonUtil.writeError(response, 500, e.getMessage());
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        try {
+            AuthUtil.requireRole(request, Rol.ADMIN);
+            Map<?, ?> body = JsonUtil.fromJson(request, Map.class);
+            Sede s = new Sede();
+            s.setNombre(str(body.get("nombre")));
+            s.setDireccion(str(body.get("direccion")));
+            s.setTelefono(str(body.get("telefono")));
+            s.setActivo(body.get("activo") == null || Boolean.parseBoolean(body.get("activo").toString()));
+            JsonUtil.writeJson(response, 201, sedeDao.insert(s));
+        } catch (SecurityException e) {
+            JsonUtil.writeError(response, 403, e.getMessage());
+        } catch (Exception e) {
+            JsonUtil.writeError(response, 400, e.getMessage());
+        }
+    }
+
+    @Override
+    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        try {
+            AuthUtil.requireRole(request, Rol.ADMIN);
+            Map<?, ?> body = JsonUtil.fromJson(request, Map.class);
+            Long id = toLong(body.get("id"));
+            Sede s = sedeDao.findById(id).orElseThrow(() -> new IllegalArgumentException("Sede no encontrada"));
+            if (body.get("nombre") != null) s.setNombre(str(body.get("nombre")));
+            if (body.get("direccion") != null) s.setDireccion(str(body.get("direccion")));
+            if (body.get("telefono") != null) s.setTelefono(str(body.get("telefono")));
+            if (body.get("activo") != null) s.setActivo(Boolean.parseBoolean(body.get("activo").toString()));
+            sedeDao.update(s);
+            JsonUtil.writeJson(response, 200, sedeDao.findById(id).orElse(s));
+        } catch (SecurityException e) {
+            JsonUtil.writeError(response, 403, e.getMessage());
+        } catch (IllegalArgumentException e) {
+            JsonUtil.writeError(response, 404, e.getMessage());
+        } catch (Exception e) {
+            JsonUtil.writeError(response, 400, e.getMessage());
+        }
+    }
+
+    @Override
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        try {
+            AuthUtil.requireRole(request, Rol.ADMIN);
+            Long id = toLong(request.getParameter("id"));
+            sedeDao.softDelete(id);
+            JsonUtil.writeJson(response, 200, Map.of("ok", true));
+        } catch (SecurityException e) {
+            JsonUtil.writeError(response, 403, e.getMessage());
+        } catch (Exception e) {
+            JsonUtil.writeError(response, 400, e.getMessage());
+        }
+    }
+
+    private static String str(Object o) { return o == null ? null : o.toString(); }
+    private static Long toLong(Object o) {
+        if (o instanceof Number n) return n.longValue();
+        return Long.parseLong(o.toString());
+    }
+}

@@ -1,0 +1,119 @@
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-shell.app-logged {
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.content-area {
+  flex: 1;
+  padding: 1.25rem;
+}
+
+.app-shell.app-public .content-area {
+  padding: 0;
+}
+
+.app-footer {
+  border-top: 1px solid rgba(15, 118, 110, 0.12);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(6px);
+}
+
+.app-sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: linear-gradient(180deg, #0f766e 0%, #0d9488 55%, #14b8a6 100%);
+  color: #fff;
+  display: none;
+  flex-direction: column;
+  padding: 1.25rem 1rem;
+  box-shadow: 4px 0 18px rgba(15, 118, 110, 0.18);
+}
+
+@media (min-width: 992px) {
+  .app-sidebar { display: flex; }
+  .app-shell.app-logged .content-area { padding: 1.5rem 1.75rem; }
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.sidebar-sub {
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.sidebar-nav a {
+  color: rgba(255, 255, 255, 0.92);
+  text-decoration: none;
+  padding: 0.65rem 0.85rem;
+  border-radius: 0.65rem;
+  font-weight: 500;
+}
+
+.sidebar-nav a:hover,
+.sidebar-nav a.active {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.app-shell.app-public {
+  min-height: 100dvh;
+}
+.app-shell.app-public .app-main,
+.app-shell.app-public .content-area {
+  min-height: 100dvh;
+  padding: 0;
+}
+
+/* Fix hueco blanco auth (sin footer) */
+.app-shell.app-public {
+  min-height: 100dvh;
+  height: 100dvh;
+  overflow: hidden;
+  background: #ecfdf5;
+}
+.app-shell.app-public .app-main,
+.app-shell.app-public .content-area {
+  padding: 0 !important;
+  min-height: 100dvh;
+  height: 100dvh;
+}
+.auth-hero {
+  height: 100% !important;
+  min-height: 100% !important;
+}
+.auth-hero img {
+  height: 100% !important;
+  min-height: 100% !important;
+  object-fit: cover;
+}

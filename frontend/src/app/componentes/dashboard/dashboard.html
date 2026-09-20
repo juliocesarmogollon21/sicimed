@@ -1,0 +1,81 @@
+<div class="dash-wrap">
+  <div class="dash-welcome hero-health mb-4">
+    <img src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1600&q=80"
+         alt="Clínica" loading="lazy">
+    <div class="dash-welcome-body">
+      <p class="eyebrow mb-1">Panel principal</p>
+      <h2 class="mb-1 text-teal">Bienvenido/a, {{ user?.nombreCompleto }}</h2>
+      <p class="text-muted mb-0">
+        Rol <span class="badge rounded-pill text-bg-success">{{ user?.rol }}</span>
+        · Policlínico San Rafael
+      </p>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <div class="stat-label">Total citas</div>
+        <div class="stat-value">{{ cargandoStats ? '…' : totalCitas }}</div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="stat-card stat-teal">
+        <div class="stat-label">Pendientes</div>
+        <div class="stat-value">{{ cargandoStats ? '…' : programadas }}</div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="stat-card stat-sky">
+        <div class="stat-label">Atendidas</div>
+        <div class="stat-value">{{ cargandoStats ? '…' : atendidas }}</div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="stat-card stat-muted">
+        <div class="stat-label">Canceladas</div>
+        <div class="stat-value">{{ cargandoStats ? '…' : canceladas }}</div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="h6 text-uppercase text-muted letter-space mb-3">Accesos rápidos</h3>
+  <div class="row g-3">
+    <div class="col-md-6 col-xl-3" *ngIf="auth.hasRole('ADMIN','RECEPCIONISTA','PACIENTE','MEDICO')">
+      <a routerLink="/citas" class="card card-action text-decoration-none h-100 shadow-sm">
+        <div class="card-body">
+          <div class="action-icon">📋</div>
+          <h5 class="card-title text-teal">Citas</h5>
+          <p class="card-text text-muted mb-0">Listar, filtrar por DNI y cancelar turnos.</p>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-6 col-xl-3" *ngIf="auth.hasRole('ADMIN','RECEPCIONISTA','PACIENTE')">
+      <a routerLink="/nueva-cita" class="card card-action text-decoration-none h-100 shadow-sm">
+        <div class="card-body">
+          <div class="action-icon">➕</div>
+          <h5 class="card-title text-teal">Nueva cita</h5>
+          <p class="card-text text-muted mb-0">Reservar sede, especialidad, médico y horario.</p>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-6 col-xl-3" *ngIf="auth.hasRole('ADMIN','MEDICO')">
+      <a routerLink="/agenda-medico" class="card card-action text-decoration-none h-100 shadow-sm">
+        <div class="card-body">
+          <div class="action-icon">🩺</div>
+          <h5 class="card-title text-teal">Agenda médico</h5>
+          <p class="card-text text-muted mb-0">Agenda, diagnóstico y receta digital.</p>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-6 col-xl-3" *ngIf="auth.hasRole('ADMIN')">
+      <a routerLink="/admin" class="card card-action text-decoration-none h-100 shadow-sm">
+        <div class="card-body">
+          <div class="action-icon">⚙️</div>
+          <h5 class="card-title text-teal">Administración</h5>
+          <p class="card-text text-muted mb-0">Usuarios, sedes, especialidades y médicos.</p>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>

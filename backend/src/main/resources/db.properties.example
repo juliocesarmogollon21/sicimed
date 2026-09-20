@@ -1,0 +1,10 @@
+# Copia este archivo como db.properties y completa tus datos locales.
+# No subas db.properties al repositorio.
+
+sicimed.db=sqlserver
+
+# SQL Server Express por TCP (ajusta host/puerto si hace falta)
+jdbc.url=jdbc:sqlserver://localhost:1433;databaseName=SICIMED;encrypt=true;trustServerCertificate=true
+jdbc.user=TU_USUARIO_SQL
+jdbc.password=TU_PASSWORD_SQL
+jdbc.driver=com.microsoft.sqlserver.jdbc.SQLServerDriver
