@@ -1,0 +1,58 @@
+<div class="container py-4 cfg-page">
+  <div class="cfg-topbar">
+    <div>
+      <a routerLink="/admin" class="btn btn-outline-teal btn-sm mb-2">← Volver al menú</a>
+      <h2 class="mb-0 text-teal">Especialidades</h2>
+      <p class="text-muted small mb-0">Catálogo clínico</p>
+    </div>
+    <button type="button" class="btn btn-teal" (click)="abrirNuevo()">+ Nueva especialidad</button>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+  <div *ngIf="mensaje" class="alert alert-success">{{ mensaje }}</div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <table class="table table-sm table-hover align-middle mb-0">
+        <thead>
+          <tr><th>Nombre</th><th>Descripción</th><th></th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let e of especialidades">
+            <td>{{ e.nombre }}</td>
+            <td>{{ e.descripcion }}</td>
+            <td class="text-end">
+              <button class="btn btn-outline-primary btn-sm" (click)="editar(e)">Editar</button>
+            </td>
+          </tr>
+          <tr *ngIf="especialidades.length===0">
+            <td colspan="3" class="text-muted text-center">Sin especialidades</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="cfg-backdrop" *ngIf="modalOpen" (click)="cerrar()">
+    <div class="cfg-modal" (click)="$event.stopPropagation()">
+      <div class="cfg-modal-header">
+        <h5 class="mb-0 text-teal">{{ form.id ? 'Editar especialidad' : 'Nueva especialidad' }}</h5>
+        <button type="button" class="btn-close" (click)="cerrar()"></button>
+      </div>
+      <div class="cfg-modal-body">
+        <div class="mb-3">
+          <label class="form-label">Nombre</label>
+          <input class="form-control" [(ngModel)]="form.nombre" name="en">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Descripción</label>
+          <input class="form-control" [(ngModel)]="form.descripcion" name="ed">
+        </div>
+      </div>
+      <div class="cfg-modal-footer">
+        <button type="button" class="btn btn-outline-secondary" (click)="cerrar()">Cancelar</button>
+        <button type="button" class="btn btn-teal" (click)="guardar()">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,164 @@
+<div class="agenda-page">
+  <div class="page-hero mb-3">
+    <p class="eyebrow mb-1">Consulta clínica</p>
+    <h2 class="page-title text-teal mb-1">Agenda médico</h2>
+    <p class="text-muted small mb-0">Diagnóstico obligatorio · receta opcional (ventana aparte)</p>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+    {{ error }}<button type="button" class="btn-close" (click)="error=''"></button>
+  </div>
+  <div *ngIf="mensaje" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+    {{ mensaje }}<button type="button" class="btn-close" (click)="mensaje=''"></button>
+  </div>
+
+  <div class="card border-0 shadow-sm mb-3 filter-panel">
+    <div class="card-body">
+      <div class="row g-2 align-items-end">
+        <div class="col-md-4">
+          <label class="form-label fw-semibold">Médico</label>
+          <select class="form-select" [(ngModel)]="medicoId" name="medicoId" [disabled]="esMedicoSesion()">
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let m of medicos" [ngValue]="m.id">{{ m.nombreCompleto }}</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Fecha</label>
+          <input type="date" class="form-control" [(ngModel)]="fecha" name="fecha">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Buscar paciente</label>
+          <input class="form-control" [(ngModel)]="filtroPaciente" name="filtroPaciente" placeholder="Nombre…">
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-teal w-100" type="button" (click)="consultar()" [disabled]="cargando">
+            {{ cargando ? '…' : 'Consultar' }}
+          </button>
+        </div>
+      </div>
+      <div class="d-flex flex-wrap gap-2 align-items-center mt-3">
+        <div class="btn-group shadow-sm" role="group">
+          <button type="button" class="btn btn-sm"
+            [class.btn-teal]="panel==='por_atender'"
+            [class.btn-outline-teal]="panel!=='por_atender'"
+            (click)="panel='por_atender'">Por atender ({{ countPendientes }})</button>
+          <button type="button" class="btn btn-sm"
+            [class.btn-teal]="panel==='atendidos'"
+            [class.btn-outline-teal]="panel!=='atendidos'"
+            (click)="panel='atendidos'">Atendidos ({{ countAtendidos }})</button>
+        </div>
+        <select class="form-select form-select-sm" style="max-width:180px" [(ngModel)]="orden" name="orden">
+          <option value="hora">Orden: hora</option>
+          <option value="paciente">Orden: paciente</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="vstack gap-3">
+    <div class="card border-0 shadow-sm cita-panel" *ngFor="let c of citasFiltradas"
+         [class.is-pendiente]="c.estado==='PENDIENTE'"
+         [class.is-atendido]="c.estado==='ATENDIDO'">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between flex-wrap gap-2 mb-3">
+          <div>
+            <span class="hora-chip">{{ c.fecha }} · {{ c.hora }}</span>
+            <h3 class="h5 mb-1 mt-2">{{ c.pacienteNombre }}</h3>
+            <span class="badge rounded-pill" [ngClass]="badgeEstado(c.estado)">{{ c.estado }}</span>
+          </div>
+          <div class="text-muted small text-md-end">
+            <div class="fw-semibold text-teal">{{ c.especialidad }}</div>
+            <div>{{ c.sedeNombre }}</div>
+          </div>
+        </div>
+
+        <div class="info-box mb-3" *ngIf="c.motivo">
+          <span class="info-label">Motivo</span>
+          <div>{{ c.motivo }}</div>
+        </div>
+
+        <!-- Por atender: solo diagnóstico -->
+        <div *ngIf="panel==='por_atender' && puedeAtender(c)">
+          <label class="form-label fw-semibold">Diagnóstico</label>
+          <textarea class="form-control mb-2" rows="3" placeholder="Escriba el diagnóstico…"
+            [(ngModel)]="diagnosticoTexto[c.id]" [name]="'diag'+c.id"></textarea>
+          <button class="btn btn-teal" type="button" (click)="guardarDiagnostico(c)">
+            Guardar y marcar atendido
+          </button>
+          <p class="small text-muted mt-2 mb-0">La receta no es obligatoria. Si hace falta, la agrega después en Atendidos.</p>
+        </div>
+
+        <!-- Atendidos: ver diagnóstico + botón receta opcional -->
+        <div *ngIf="panel==='atendidos'">
+          <div class="info-box mb-3" *ngIf="c.diagnostico || diagnosticoTexto[c.id]">
+            <span class="info-label">Diagnóstico</span>
+            <div>{{ c.diagnostico || diagnosticoTexto[c.id] }}</div>
+          </div>
+          <div class="d-flex flex-wrap gap-2" *ngIf="puedeAtender(c)">
+            <button class="btn btn-outline-teal" type="button" (click)="abrirReceta(c)">
+              Receta (opcional)
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="!cargando && citasFiltradas.length===0" class="empty-state card border-0 shadow-sm">
+      <div class="card-body text-center py-5 text-muted">
+        <p class="mb-0" *ngIf="panel==='por_atender'">No hay citas pendientes con ese filtro.</p>
+        <p class="mb-0" *ngIf="panel==='atendidos'">Aún no hay citas atendidas en esta fecha.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal receta -->
+<div class="receta-backdrop" *ngIf="showRecetaModal && citaReceta" (click)="cerrarReceta()"></div>
+<div class="receta-modal card shadow-lg border-0" *ngIf="showRecetaModal && citaReceta" role="dialog">
+  <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+    <div>
+      <strong class="text-teal">Receta digital</strong>
+      <div class="small text-muted">{{ citaReceta.pacienteNombre }} · {{ citaReceta.fecha }} {{ citaReceta.hora }}</div>
+    </div>
+    <button type="button" class="btn-close" (click)="cerrarReceta()"></button>
+  </div>
+  <div class="card-body">
+    <div *ngIf="recetaGuardadaMsg" class="alert alert-success py-2">{{ recetaGuardadaMsg }}</div>
+    <div class="receta-fila mb-2" *ngFor="let it of itemsDe(citaReceta.id); let i = index">
+      <div class="row g-1 align-items-end">
+        <div class="col-md-4">
+          <label class="form-label small mb-0">Catálogo</label>
+          <select class="form-select form-select-sm"
+            [ngModel]="it.medicamentoId || ''"
+            (ngModelChange)="onPickCatalogo(citaReceta!.id, i, $event)"
+            [name]="'cat'+citaReceta.id+'_'+i">
+            <option value="">— Escribir nombre —</option>
+            <option *ngFor="let m of catalogo" [value]="m.id">{{ m.nombre }}</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small mb-0">Nombre</label>
+          <input class="form-control form-control-sm" [(ngModel)]="it.nombre" [name]="'nom'+citaReceta.id+'_'+i">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small mb-0">Dosis</label>
+          <input class="form-control form-control-sm" [(ngModel)]="it.dosis" [name]="'dos'+citaReceta.id+'_'+i" placeholder="1 tab">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small mb-0">Frecuencia</label>
+          <input class="form-control form-control-sm" [(ngModel)]="it.frecuencia" [name]="'fre'+citaReceta.id+'_'+i" placeholder="c/8h">
+        </div>
+        <div class="col-md-1">
+          <button type="button" class="btn btn-sm btn-outline-danger w-100" (click)="quitarFila(citaReceta!.id, i)">×</button>
+        </div>
+      </div>
+    </div>
+    <button type="button" class="btn btn-sm btn-outline-teal mb-2" (click)="agregarFila(citaReceta.id)">+ Medicamento</button>
+    <textarea class="form-control mb-3" rows="2" placeholder="Indicaciones generales…"
+      [(ngModel)]="recetaInd[citaReceta.id]" [name]="'ind'+citaReceta.id"></textarea>
+    <div class="d-flex gap-2 justify-content-end">
+      <button type="button" class="btn btn-outline-secondary" (click)="cerrarReceta()">Cerrar</button>
+      <button type="button" class="btn btn-teal" (click)="guardarReceta()">Guardar receta</button>
+    </div>
+  </div>
+</div>

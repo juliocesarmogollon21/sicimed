@@ -1,0 +1,54 @@
+.dash-welcome {
+  position: relative;
+}
+
+.dash-welcome img {
+  height: 160px;
+}
+
+.dash-welcome-body {
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.eyebrow {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #0f766e;
+  font-weight: 600;
+}
+
+.letter-space {
+  letter-spacing: 0.06em;
+}
+
+.stat-card {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1.1rem 1.25rem;
+  box-shadow: 0 8px 20px rgba(15, 118, 110, 0.08);
+  border: 1px solid rgba(13, 148, 136, 0.08);
+  height: 100%;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-bottom: 0.35rem;
+}
+
+.stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0f766e;
+  line-height: 1.1;
+}
+
+.stat-teal { background: linear-gradient(135deg, #ccfbf1, #fff); }
+.stat-sky { background: linear-gradient(135deg, #e0f2fe, #fff); }
+.stat-muted { background: linear-gradient(135deg, #f1f5f9, #fff); }
+
+.action-icon {
+  font-size: 1.4rem;
+  margin-bottom: 0.35rem;
+}

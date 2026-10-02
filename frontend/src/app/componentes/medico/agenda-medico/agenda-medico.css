@@ -1,0 +1,64 @@
+.agenda-page { max-width: 920px; position: relative; }
+
+.page-hero {
+  padding: 1.15rem 1.4rem;
+  border-radius: 1.15rem;
+  background: linear-gradient(135deg, #fff 0%, #ecfdf5 100%);
+  border: 1px solid rgba(13, 148, 136, 0.12);
+}
+.page-title { font-weight: 700; letter-spacing: -0.02em; }
+.eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #0d9488;
+  font-weight: 600;
+}
+
+.filter-panel, .cita-panel, .empty-state { border-radius: 1rem; }
+
+.cita-panel { border-left: 5px solid #cbd5e1 !important; }
+.cita-panel.is-pendiente { border-left-color: #f59e0b !important; }
+.cita-panel.is-atendido { border-left-color: #22c55e !important; }
+
+.hora-chip {
+  display: inline-block;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: #ecfdf5;
+  color: #0f766e;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.info-box {
+  background: #f8fafc;
+  border-radius: 0.85rem;
+  padding: 0.75rem 1rem;
+}
+.info-label {
+  display: block;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #64748b;
+  margin-bottom: 0.2rem;
+}
+
+.receta-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  z-index: 1040;
+}
+.receta-modal {
+  position: fixed;
+  z-index: 1050;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(720px, calc(100vw - 1.5rem));
+  max-height: calc(100vh - 2rem);
+  overflow: auto;
+  border-radius: 1.1rem;
+}

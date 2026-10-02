@@ -1,0 +1,195 @@
+<div class="container-fluid py-2 lista-citas-page">
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <div>
+      <p class="eyebrow mb-0">Gestión de turnos</p>
+      <h2 class="mb-0 text-teal page-title">Citas</h2>
+    </div>
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      <div class="btn-group" role="group" aria-label="Vista">
+        <button type="button" class="btn btn-sm"
+          [class.btn-teal]="vista==='calendario'"
+          [class.btn-outline-teal]="vista!=='calendario'"
+          (click)="setVista('calendario')">Calendario</button>
+        <button type="button" class="btn btn-sm"
+          [class.btn-teal]="vista==='tabla'"
+          [class.btn-outline-teal]="vista!=='tabla'"
+          (click)="setVista('tabla')">Tabla</button>
+      </div>
+      <a routerLink="/nueva-cita" class="btn btn-teal btn-sm"
+         *ngIf="auth.hasRole('ADMIN','RECEPCIONISTA','PACIENTE')">+ Nueva cita</a>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mb-3 filter-card" *ngIf="auth.hasRole('RECEPCIONISTA','ADMIN')">
+    <div class="card-body py-3">
+      <label class="form-label mb-1 fw-semibold">Buscar por DNI del paciente</label>
+      <div class="input-group" style="max-width:420px">
+        <input class="form-control" [(ngModel)]="dni" name="dni" placeholder="Ej. 71234567"
+               (keyup.enter)="buscarDni()">
+        <button class="btn btn-outline-success" type="button" (click)="buscarDni()">Buscar</button>
+        <button class="btn btn-outline-secondary" type="button" (click)="dni=''; cargar()">Limpiar</button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+    {{ error }}
+    <button type="button" class="btn-close" (click)="error=''"></button>
+  </div>
+  <div *ngIf="mensaje" class="alert alert-success alert-dismissible fade show" role="alert">
+    {{ mensaje }}
+    <button type="button" class="btn-close" (click)="mensaje=''"></button>
+  </div>
+
+  <!-- Vista Calendario semanal -->
+  <div *ngIf="vista==='calendario'" class="week-calendar card shadow-sm border-0">
+    <div class="card-body py-3">
+      <div class="d-flex flex-wrap gap-2 align-items-center justify-content-between mb-3">
+        <div class="btn-group">
+          <button type="button" class="btn btn-outline-teal btn-sm" (click)="semanaAnterior()">← Anterior</button>
+          <button type="button" class="btn btn-outline-teal btn-sm" (click)="irHoy()">Hoy</button>
+          <button type="button" class="btn btn-outline-teal btn-sm" (click)="semanaSiguiente()">Siguiente →</button>
+        </div>
+        <strong class="text-teal">Semana {{ etiquetaSemana() }}</strong>
+        <div class="d-flex flex-wrap gap-2 legend">
+          <span class="legend-item"><i class="legend-dot pendiente"></i> Pendiente</span>
+          <span class="legend-item"><i class="legend-dot atendido"></i> Atendido</span>
+          <span class="legend-item"><i class="legend-dot cancelado"></i> Cancelado</span>
+        </div>
+      </div>
+
+      <div class="week-grid-wrap">
+        <div class="week-grid">
+          <div class="week-corner"></div>
+          <div class="week-day-head" *ngFor="let d of diasDeSemana(); let i = index"
+               [class.week-today]="esHoy(d)">
+            <div class="week-dow">{{ diasSemana[i] }}</div>
+            <div class="week-dom">{{ d.getDate() }}</div>
+          </div>
+
+          <ng-container *ngFor="let h of horas">
+            <div class="week-hour">{{ h < 10 ? '0'+h : h }}:00</div>
+            <div class="week-cell" *ngFor="let d of diasDeSemana()"
+                 [class.week-today-col]="esHoy(d)">
+              <div *ngFor="let c of citasEnCelda(d, h)"
+                   class="cal-bar" [ngClass]="claseEstado(c.estado)"
+                   [title]="c.pacienteNombre + ' · ' + c.medicoNombre">
+                <div class="cal-bar-time">{{ normalizarHora(c.hora) }}</div>
+                <div class="cal-bar-title">{{ c.pacienteNombre }}</div>
+                <div class="cal-bar-sub text-truncate">{{ c.medicoNombre }}</div>
+                <div class="cal-bar-actions">
+                  <button *ngIf="c.estado==='PENDIENTE'" type="button"
+                    class="btn btn-sm btn-light py-0 px-1" (click)="abrirReprogramar(c)">Reprog.</button>
+                  <button *ngIf="c.estado==='PENDIENTE'" type="button"
+                    class="btn btn-sm btn-outline-danger py-0 px-1" (click)="cancelar(c)">Cancelar</button>
+                  <button *ngIf="puedeVerReceta(c) && auth.hasRole('PACIENTE')" type="button"
+                    class="btn btn-sm btn-teal py-0 px-1" (click)="abrirReceta(c)">Ver receta</button>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vista Tabla -->
+  <div *ngIf="vista==='tabla'" class="table-responsive card shadow-sm border-0">
+    <table class="table table-hover align-middle mb-0 citas-table">
+      <thead>
+        <tr>
+          <th>ID</th><th>Fecha</th><th>Hora</th><th>Médico</th>
+          <th>Paciente</th><th>Sede</th><th>Estado</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of citas">
+          <td class="text-muted">#{{ c.id }}</td>
+          <td>{{ c.fecha }}</td>
+          <td><span class="hora-pill">{{ c.hora }}</span></td>
+          <td>{{ c.medicoNombre }}</td>
+          <td>{{ c.pacienteNombre }}</td>
+          <td>{{ c.sedeNombre }}</td>
+          <td>
+            <span class="badge rounded-pill" [ngClass]="badgeEstado(c.estado)">{{ c.estado }}</span>
+          </td>
+          <td class="text-end text-nowrap">
+            <button *ngIf="c.estado==='PENDIENTE'" class="btn btn-outline-primary btn-sm me-1"
+              (click)="abrirReprogramar(c)">Reprogramar</button>
+            <button *ngIf="c.estado==='PENDIENTE'" class="btn btn-outline-danger btn-sm me-1"
+              (click)="cancelar(c)">Cancelar</button>
+            <button *ngIf="puedeVerReceta(c) && auth.hasRole('PACIENTE')" class="btn btn-teal btn-sm"
+              (click)="abrirReceta(c)">Ver receta</button>
+          </td>
+        </tr>
+        <tr *ngIf="citas.length===0">
+          <td colspan="8" class="text-muted text-center py-4">Sin citas registradas</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal Receta -->
+<div class="modal-backdrop-sic" *ngIf="recetaVisible" (click)="cerrarReceta()"></div>
+<div class="modal-panel-sic" *ngIf="recetaVisible" role="dialog" aria-modal="true">
+  <div class="modal-panel-inner card shadow">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+      <strong class="text-teal">Receta · cita #{{ recetaCita?.id }}</strong>
+      <button type="button" class="btn-close" (click)="cerrarReceta()"></button>
+    </div>
+    <div class="card-body">
+      <div *ngIf="recetaCargando" class="text-muted">Cargando…</div>
+      <ng-container *ngIf="!recetaCargando && recetaData">
+        <p class="mb-2"><span class="label-soft">Paciente</span> {{ recetaCita?.pacienteNombre }}</p>
+        <p class="mb-2"><span class="label-soft">Médico</span> {{ recetaCita?.medicoNombre }}</p>
+        <p class="mb-3" *ngIf="recetaCita?.diagnostico">
+          <span class="label-soft">Diagnóstico</span> {{ recetaCita?.diagnostico }}
+        </p>
+        <h6 class="text-teal">Medicamentos</h6>
+        <ul class="list-group mb-3" *ngIf="recetaItems.length; else sinItems">
+          <li class="list-group-item" *ngFor="let it of recetaItems">
+            <strong>{{ it.nombre }}</strong>
+            <div class="small text-muted" *ngIf="it.dosis || it.frecuencia">
+              <span *ngIf="it.dosis">Dosis: {{ it.dosis }}</span>
+              <span *ngIf="it.dosis && it.frecuencia"> · </span>
+              <span *ngIf="it.frecuencia">Frecuencia: {{ it.frecuencia }}</span>
+            </div>
+          </li>
+        </ul>
+        <ng-template #sinItems>
+          <p class="text-muted small">Sin ítems estructurados.
+            <span *ngIf="recetaData.medicamentos">{{ recetaData.medicamentos }}</span>
+          </p>
+        </ng-template>
+        <h6 class="text-teal">Indicaciones</h6>
+        <p class="mb-0" style="white-space:pre-wrap">{{ recetaData.indicaciones || '—' }}</p>
+      </ng-container>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Reprogramar -->
+<div class="modal-backdrop-sic" *ngIf="reprogVisible" (click)="cerrarReprogramar()"></div>
+<div class="modal-panel-sic" *ngIf="reprogVisible" role="dialog" aria-modal="true">
+  <div class="modal-panel-inner card shadow" style="max-width:420px">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+      <strong class="text-teal">Reprogramar cita #{{ reprogCita?.id }}</strong>
+      <button type="button" class="btn-close" (click)="cerrarReprogramar()"></button>
+    </div>
+    <div class="card-body">
+      <div class="mb-3">
+        <label class="form-label">Nueva fecha</label>
+        <input type="date" class="form-control" [(ngModel)]="reprogFecha" name="rf">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Nueva hora</label>
+        <input type="time" class="form-control" [(ngModel)]="reprogHora" name="rh" step="1800">
+      </div>
+      <div class="d-flex gap-2 justify-content-end">
+        <button type="button" class="btn btn-outline-secondary" (click)="cerrarReprogramar()">Cerrar</button>
+        <button type="button" class="btn btn-teal" (click)="confirmarReprogramar()">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
