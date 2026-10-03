@@ -55,6 +55,8 @@ npm -v
 
 ## Puesta en marcha
 
+Todos los comandos se ejecutan desde la **terminal integrada de Visual Studio Code** (Ctrl+`).
+
 ```bash
 npm install
 npx ng serve
@@ -62,9 +64,15 @@ npx ng serve
 
 Abrir http://localhost:4200
 
-El backend debe estar corriendo (ver [backend/README.md](../backend/README.md)); si no, el login fallará con un
-error de red. Para comprobarlo: http://localhost:8080/sicimed/api/sistema/estado debe responder
-`preparado: true`.
+El backend debe estar corriendo. Según la opción que se haya elegido:
+
+| Opción del backend | URL para comprobar que responde |
+|---|---|
+| A — Tomcat + MySQL | http://localhost:8080/sicimed/api/sistema/estado |
+| B — standalone con perfil `dev` | http://localhost:8080/api/sistema/estado |
+
+Debe responder `preparado: true`. Si el backend no está corriendo, el login fallará con un error de
+red; si está corriendo pero en la otra URL, el login fallará con `Credenciales inválidas`.
 
 > Con npm 11.19 o superior puede aparecer un aviso `install-scripts` sobre paquetes como `esbuild`
 > o `@parcel/watcher`. **Son avisos, no errores**: el build funciona igual. Si llegaras a ver un
@@ -89,20 +97,54 @@ web o CDN.
 
 ---
 
-## Configurar la URL del backend
+## Configurar la URL del API
 
-Hay dos archivos y ambos apuntan al backend desplegado en Tomcat con contexto `/sicimed`:
+Hay dos archivos y cada uno se usa según cómo ejecutes la aplicación:
 
-| Archivo | Se usa en | apiUrl |
+| Archivo | Se usa con | Qué poner |
 |---|---|---|
-| `src/environments/environment.development.ts` | `ng serve` (configuración development) | `http://localhost:8080/sicimed/api` |
-| `src/environments/environment.ts` | `ng build` (configuración production) | `http://localhost:8080/sicimed/api` |
+| `src/environments/environment.development.ts` | `npx ng serve` (desarrollo) | Ver abajo |
+| `src/environments/environment.ts` | `npx ng build` (producción) | `http://localhost:8080/sicimed/api` |
 
-Si el backend corre en otro puerto, contexto o dominio, cambiar `apiUrl` en ambos. Con el perfil
-`dev` del backend (sin contexto) el valor es `http://localhost:8080/api`.
+### El valor por defecto
 
-El CORS del backend permite únicamente el origen `http://localhost:4200`. Si el frontend se sirve
-en otro origen, hay que agregarlo también en `SecurityConfig.setAllowedOrigins`.
+El archivo de desarrollo viene con `http://localhost:8080/sicimed/api`, que corresponde a la
+**Opción A: el WAR desplegado en Tomcat** con context path `/sicimed`. Es la opción principal y la
+que se usa en el laboratorio.
+
+Si en su lugar levantaste el backend **sin Tomcat**, hay que quitarle el `/sicimed`:
+
+| Cómo levantaste el backend | `apiUrl` |
+|---|---|
+| WAR desplegado en Tomcat con context path `/sicimed` | `http://localhost:8080/sicimed/api` |
+| `java -jar target/sicimed.war --spring.profiles.active=dev` | `http://localhost:8080/api` |
+
+Después de cambiarlo, hay que **reiniciar `ng serve`** para que tome el valor nuevo.
+
+### Por qué importa: el síntoma cuando no coincide
+
+Si `apiUrl` no apunta a donde está el backend, la aplicación **no muestra ningún error de red**.
+Simplemente dice `Credenciales inválidas` o devuelve `401 No autenticado`, aunque el backend esté
+funcionando perfectamente.
+
+Comprobación para saber cuál de los dos es:
+
+```bash
+# Si responde, el backend está en /sicimed/api (Opción A, Tomcat)
+curl http://localhost:8080/sicimed/api/sistema/estado
+
+# Si responde, el backend está en /api (Opción B, standalone)
+curl http://localhost:8080/api/sistema/estado
+```
+
+El que responda `{"estado":"activo","preparado":true,...}` es donde está tu backend, y ese es el
+valor que debe llevar `apiUrl`.
+
+### CORS
+
+El backend permite únicamente el origen `http://localhost:4200`. Si el frontend se sirve en otro
+origen (por ejemplo `localhost:4300`), hay que agregar ese origen en
+`SecurityConfig.setAllowedOrigins` del backend, o el navegador bloqueará las peticiones.
 
 ---
 
@@ -112,10 +154,33 @@ en otro origen, hay que agregarlo también en `SecurityConfig.setAllowedOrigins`
 |---|---|---|
 | `admin` | `admin123` | ADMIN |
 | `recepcion` | `recep123` | RECEPCIONISTA |
-| `medico1` | `medico123` | MEDICO |
-| `paciente1` | `paciente123` | PACIENTE |
+| `medico1` | `medico123` | MEDICO (Medicina General, Sede Centro) |
+| `medico2` | `medico123` | MEDICO (Pediatría, Sede Norte) |
+| `medico3` | `medico123` | MEDICO (Ginecología, Sede Centro) |
+| `paciente1` | `paciente123` | PACIENTE (María Pérez) |
+| `paciente2` | `paciente123` | PACIENTE (Luis Álvarez) |
+| `paciente3` | `paciente123` | PACIENTE (Carmen Rojas) |
+| `paciente4` | `paciente123` | PACIENTE (Jorge Díaz) |
 
 También se puede crear una cuenta nueva en `/registro`, que siempre queda con rol PACIENTE.
+
+### Qué hay cargado al arrancar
+
+El backend carga catálogos y **15 citas de ejemplo** en tres semanas, para que las pantallas se
+vean con contenido desde el primer momento:
+
+- **3 citas `ATENDIDO`** con diagnóstico y receta emitida (una de ellas con dos medicamentos)
+- **1 cita `CANCELADO`** para ver el estado
+- **11 citas `PENDIENTE`** repartidas entre los tres médicos
+
+Para ver el flujo médico completo: entra con `medico1` / `medico123`, abre **Agenda**, y en las
+pestañas **Atendidos** puedes abrir la receta de una consulta ya cerrada.
+
+Para probar como paciente: entra con `paciente1` / `paciente123` y verás sus 4 citas, incluida
+una atendida con su receta.
+
+> Con el perfil `dev` la base está en memoria: al reiniciar el backend se borra y se recarga la
+> semilla.
 
 ---
 

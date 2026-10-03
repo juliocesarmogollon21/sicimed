@@ -63,8 +63,29 @@ Visión general del proyecto: [README principal](../README.md). Cliente web: [fr
 
 ## 3. Puesta en marcha
 
+> **Elige una forma antes de empezar.** Hay dos, y lo que cambia entre ellas es la **URL de la
+> API**, porque al desplegar en Tomcat la aplicación queda bajo el contexto `/sicimed`:
+>
+> | | Opción A — Tomcat + MySQL (principal) | Opción B — standalone con perfil `dev` |
+> |---|---|---|
+> | URL de la API | `http://localhost:8080/sicimed/api` | `http://localhost:8080/api` |
+> | Requisitos | JDK 17, Tomcat 10.1, MySQL 8 | Solo JDK 17 |
+> | Pasos | Los de abajo | Ver [sección 4](#4-perfil-dev-con-h2-sin-mysql) |
+>
+> La **Opción A es la principal** y la que se usa en el laboratorio. Si no quieres crear la base
+> de datos en MySQL ni usar Tomcat, ve directo a la Opción B.
+>
+> Si el frontend muestra `Credenciales inválidas` o `401 No autenticado`, casi siempre es porque
+> el `apiUrl` no coincide con la URL de esta tabla. Ver
+> [frontend/README.md](../frontend/README.md#configurar-la-url-del-api).
+
+### Opción A — Tomcat + MySQL (la principal, usada en el laboratorio)
+
 Orden: instalar JDK y Tomcat (una vez), instalar MySQL y crear la base (una vez), generar el WAR
-y desplegarlo. Los comandos se ejecutan desde la raíz del repositorio salvo que se indique otra cosa.
+y desplegarlo.
+
+**Todos los comandos de este documento se ejecutan desde la terminal integrada de Visual Studio
+Code** (Ctrl+`), salvo los que se indican en el panel de Maven o en el panel Servers.
 
 ### Paso 1 — Instalar JDK 17 y Tomcat 10.1 y registrarlo en VS Code
 
@@ -205,7 +226,7 @@ El backend usa MySQL/MariaDB. Si la base `sicimed` no existe, el despliegue fall
 Crearla una vez:
 
 ```bash
-"C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" -u root -p -e "CREATE DATABASE sicimed CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+& "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" -u root -p -e "CREATE DATABASE sicimed CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 ```
 
 O importando el script del repositorio:
@@ -333,7 +354,10 @@ prueba, y un login en esa ventana falla.
 ## 4. Perfil `dev` con H2 (sin MySQL)
 
 `application-dev.yml` reemplaza MySQL por una base **H2 en memoria**; los datos de prueba se cargan
-solos al arrancar (`DatosSemilla`) y se pierden al detener el proceso. Sirve para desarrollar y
+solos al arrancar (`DatosSemilla`) y se pierden al detener el proceso.
+La semilla incluye **15 citas de ejemplo** repartidas en tres semanas (3 `ATENDIDO` con receta,
+1 `CANCELADO` y 11 `PENDIENTE`), 4 pacientes y los catálogos, para que el sistema se pueda probar
+sin agendar nada a mano. Sirve para desarrollar y
 para correr las pruebas sin instalar nada más. En este modo el backend corre standalone, **sin el
 contexto `/sicimed`**: la API queda en `http://localhost:8080/api`.
 
@@ -354,7 +378,38 @@ java -jar target/sicimed.war --spring.profiles.active=dev
 | por defecto (`application.yml`) | MySQL `sicimed` en `localhost:3306` | `http://localhost:8080/sicimed/api` (Tomcat) |
 | `dev` (`application-dev.yml`) | H2 en memoria | `http://localhost:8080/api` |
 
-Si se usa el perfil `dev`, el `apiUrl` del frontend debe apuntar a `http://localhost:8080/api`.
+### Si el frontend dice `Credenciales inválidas` o `401 No autenticado`
+
+El backend está bien y `/api/sistema/estado` responde, pero la aplicación no puede iniciar sesión.
+La causa es que `apiUrl` del frontend sigue apuntando a la URL con contexto de Tomcat.
+
+Con este perfil, el backend corre standalone **sin** Tomcat, así que **no hay contexto `/sicimed`**.
+Hay que cambiar en `frontend/src/environments/environment.development.ts`:
+
+```ts
+// Correcto con el perfil dev (standalone, sin Tomcat)
+export const environment = {
+  production: false,
+  apiUrl: 'http://localhost:8080/api'
+};
+```
+
+Si el backend corre en otro puerto, añadirlo también:
+
+```
+DB_URL no aplica aqui; se cambia con --server.port=8090
+apiUrl: 'http://localhost:8090/api'
+```
+
+Comprobación rápida de que el login funciona:
+
+```bash
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin123"}'
+```
+
+Si devuelve un `token`, el backend está bien y el problema es el `apiUrl` del frontend.
 
 ---
 
