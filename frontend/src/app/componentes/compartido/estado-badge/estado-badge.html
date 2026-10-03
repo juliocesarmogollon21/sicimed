@@ -1,0 +1,5 @@
+<span class="badge text-uppercase"
+  [class.text-bg-warning]="estado() === 'PENDIENTE'"
+  [class.text-bg-success]="estado() === 'ATENDIDO'"
+  [class.text-bg-secondary]="estado() === 'CANCELADO'"
+  [class.text-bg-light]="!conocido">{{ estado() }}</span>

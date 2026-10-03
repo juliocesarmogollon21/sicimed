@@ -1,0 +1,257 @@
+<div class="container-fluid py-2 lista-citas-page">
+  <div class="page-head">
+    <div>
+      <p class="page-eyebrow">Gestión de turnos</p>
+      <h2 class="page-title">Citas</h2>
+    </div>
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      <div class="btn-group" role="group" aria-label="Vista">
+        <button type="button" class="btn btn-sm"
+          [class.btn-teal]="vista==='calendario'"
+          [class.btn-outline-teal]="vista!=='calendario'"
+        (click)="setVista('calendario')">Calendario</button>
+        <button type="button" class="btn btn-sm"
+          [class.btn-teal]="vista==='tabla'"
+          [class.btn-outline-teal]="vista!=='tabla'"
+        (click)="setVista('tabla')">Tabla</button>
+      </div>
+      @if (auth.hasRole('ADMIN','RECEPCIONISTA','PACIENTE')) {
+        <a routerLink="/nueva-cita" class="btn btn-teal btn-sm"
+        >Nueva cita</a>
+      }
+    </div>
+  </div>
+
+  @if (auth.hasRole('RECEPCIONISTA','ADMIN')) {
+    <div class="card mb-3">
+      <div class="card-body py-3">
+        <label class="form-label" for="lc-dni">Buscar por DNI del paciente</label>
+        <div class="row"><div class="col-md-8 col-lg-6"><div class="input-group">
+          <input id="lc-dni" class="form-control" [(ngModel)]="dni" name="dni"
+            placeholder="Ej. 71234567" (keyup.enter)="buscarDni()">
+            <button class="btn btn-outline-teal" type="button" (click)="buscarDni()">Buscar</button>
+            <button class="btn btn-outline-secondary" type="button" (click)="dni=''; cargar()">Limpiar</button>
+          </div></div></div>
+        </div>
+      </div>
+    }
+
+    <app-alerta [mensaje]="error" tipo="danger" (cerrar)="error = ''" />
+    <app-alerta [mensaje]="mensaje" tipo="success" (cerrar)="mensaje = ''" />
+
+    <!-- Vista calendario semanal -->
+    @if (vista==='calendario') {
+      <div class="week-calendar card">
+        <div class="card-body py-3">
+          <div class="d-flex flex-wrap gap-2 align-items-center justify-content-between mb-3">
+            <div class="btn-group">
+              <button type="button" class="btn btn-outline-teal btn-sm" (click)="semanaAnterior()">Anterior</button>
+              <button type="button" class="btn btn-outline-teal btn-sm" (click)="irHoy()">Hoy</button>
+              <button type="button" class="btn btn-outline-teal btn-sm" (click)="semanaSiguiente()">Siguiente</button>
+            </div>
+            <strong class="text-teal">Semana {{ etiquetaSemana() }}</strong>
+            <div class="d-flex flex-wrap gap-3 legend">
+              <span class="legend-item"><i class="legend-dot pendiente"></i> Pendiente</span>
+              <span class="legend-item"><i class="legend-dot atendido"></i> Atendido</span>
+              <span class="legend-item"><i class="legend-dot cancelado"></i> Cancelado</span>
+            </div>
+          </div>
+          <div class="week-grid-wrap">
+            <div class="week-grid">
+              <div class="week-corner"></div>
+              @for (d of diasDeSemana(); track $index; let i = $index) {
+                <div class="week-day-head"
+                  [class.week-today]="esHoy(d)">
+                  <div class="week-dow">{{ diasSemana[i] }}</div>
+                  <div class="week-dom">{{ d.getDate() }}</div>
+                </div>
+              }
+              @for (h of horas; track h) {
+                <div class="week-hour">{{ h < 10 ? '0'+h : h }}:00</div>
+                @for (d of diasDeSemana(); track $index) {
+                  <div class="week-cell"
+                    [class.week-today-col]="esHoy(d)">
+                    @for (c of citasEnCelda(d, h); track c.id) {
+                      <div
+                        class="cal-bar"
+                        [class.cal-bar-pendiente]="c.estado==='PENDIENTE'"
+                        [class.cal-bar-atendido]="c.estado==='ATENDIDO'"
+                        [class.cal-bar-cancelado]="c.estado==='CANCELADO'"
+                        [title]="c.pacienteNombre + ' - ' + c.medicoNombre">
+                        <div class="cal-bar-time">{{ normalizarHora(c.hora) }}</div>
+                        <div class="cal-bar-title">{{ c.pacienteNombre }}</div>
+                        <div class="cal-bar-sub text-truncate">{{ c.medicoNombre }}</div>
+                        <div class="cal-bar-actions">
+                          @if (c.estado==='PENDIENTE') {
+                            <button type="button"
+                            class="btn btn-sm btn-outline-teal py-0 px-1" (click)="abrirReprogramar(c)">Reprogramar</button>
+                          }
+                          @if (c.estado==='PENDIENTE') {
+                            <button type="button"
+                            class="btn btn-sm btn-outline-danger py-0 px-1" (click)="cancelar(c)">Cancelar</button>
+                          }
+                          @if (puedeVerReceta(c) && auth.hasRole('PACIENTE')) {
+                            <button type="button"
+                            class="btn btn-sm btn-teal py-0 px-1" (click)="abrirReceta(c)">Ver receta</button>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Vista tabla -->
+    @if (vista==='tabla') {
+      <div class="table mb-0-responsive card">
+        <table class="table mb-0 table-hover align-middle citas-table">
+          <thead>
+            <tr>
+              <th>ID</th><th>Fecha</th><th>Hora</th><th>Médico</th>
+              <th>Paciente</th><th>Sede</th><th>Estado</th><th class="text-end">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of citas; track c.id) {
+              <tr>
+                <td class="text-muted">#{{ c.id }}</td>
+                <td>{{ c.fecha }}</td>
+                <td><span class="hora-chip">{{ c.hora }}</span></td>
+                <td>{{ c.medicoNombre }}</td>
+                <td>{{ c.pacienteNombre }}</td>
+                <td>{{ c.sedeNombre }}</td>
+                <td>
+                  <app-estado-badge [estado]="c.estado" />
+                </td>
+                <td class="text-end text-nowrap">
+                  @if (c.estado==='PENDIENTE') {
+                    <button class="btn btn-outline-teal btn-sm me-1"
+                    (click)="abrirReprogramar(c)">Reprogramar</button>
+                  }
+                  @if (c.estado==='PENDIENTE') {
+                    <button class="btn btn-outline-danger btn-sm me-1"
+                    (click)="cancelar(c)">Cancelar</button>
+                  }
+                  @if (puedeVerReceta(c) && auth.hasRole('PACIENTE')) {
+                    <button class="btn btn-teal btn-sm"
+                    (click)="abrirReceta(c)">Ver receta</button>
+                  }
+                </td>
+              </tr>
+            }
+            @if (citas.length===0) {
+              <tr>
+                <td colspan="8" class="text-muted text-center py-4">Sin citas registradas</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+  <!-- Modal receta -->
+  @if (recetaVisible) {
+    <div class="modal-backdrop-sic" (click)="cerrarReceta()"></div>
+  }
+  @if (recetaVisible) {
+    <div class="modal-panel-sic" role="dialog" aria-modal="true">
+      <div class="modal-panel-inner card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <strong class="text-teal">Receta - cita #{{ recetaCita?.id }}</strong>
+          <button type="button" class="btn-close" (click)="cerrarReceta()" aria-label="Cerrar"></button>
+        </div>
+        <div class="card-body">
+          @if (recetaCargando) {
+            <div class="text-muted">Cargando...</div>
+          }
+          @if (!recetaCargando && recetaData) {
+            <p class="mb-2"><span class="label-soft">Paciente</span> {{ recetaCita?.pacienteNombre }}</p>
+            <p class="mb-2"><span class="label-soft">Médico</span> {{ recetaCita?.medicoNombre }}</p>
+            @if (recetaCita?.diagnostico) {
+              <p class="mb-3">
+                <span class="label-soft">Diagnóstico</span> {{ recetaCita?.diagnostico }}
+              </p>
+            }
+            <h6 class="text-teal">Medicamentos</h6>
+            @if (recetaItems.length) {
+              <ul class="list-group mb-3">
+                @for (it of recetaItems; track $index) {
+                  <li class="list-group-item">
+                    <strong>{{ it.nombre }}</strong>
+                    @if (it.dosis || it.frecuencia) {
+                      <div class="small text-muted">
+                        @if (it.dosis) {
+                          <span>Dosis: {{ it.dosis }}</span>
+                        }
+                        @if (it.dosis && it.frecuencia) {
+                          <span> - </span>
+                        }
+                        @if (it.frecuencia) {
+                          <span>Frecuencia: {{ it.frecuencia }}</span>
+                        }
+                      </div>
+                    }
+                  </li>
+                }
+              </ul>
+            } @else {
+              <p class="text-muted small">Sin ítems estructurados.
+                @if (recetaData.medicamentos) {
+                  <span>{{ recetaData.medicamentos }}</span>
+                }
+              </p>
+            }
+            <h6 class="text-teal">Indicaciones</h6>
+            <p class="mb-0 texto-pre">{{ recetaData.indicaciones || '—' }}</p>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Modal reprogramar -->
+  @if (reprogVisible) {
+    <div class="modal-backdrop-sic" (click)="cerrarReprogramar()"></div>
+  }
+  @if (reprogVisible) {
+    <div class="modal-panel-sic" role="dialog" aria-modal="true">
+      <div class="modal-panel-inner modal-panel-sm card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <strong class="text-teal">Reprogramar cita #{{ reprogCita?.id }}</strong>
+          <button type="button" class="btn-close" (click)="cerrarReprogramar()" aria-label="Cerrar"></button>
+        </div>
+        <div class="card-body">
+          <form [formGroup]="reprogForm" (ngSubmit)="confirmarReprogramar()" novalidate>
+            <div class="mb-3">
+              <label class="form-label" for="rp-modal-fecha">Nueva fecha</label>
+              <input id="rp-modal-fecha" type="date" class="form-control" formControlName="fecha"
+                [min]="fechaMinima" [class.is-invalid]="mostrarReprogError('fecha')">
+                @if (mostrarReprogError('fecha')) {
+                  <span class="invalid-feedback d-block">{{ mensajeReprogError('fecha') }}</span>
+                }
+              </div>
+              <div class="mb-3">
+                <label class="form-label" for="rp-modal-hora">Nueva hora</label>
+                <input id="rp-modal-hora" type="time" class="form-control" formControlName="hora"
+                  step="1800" [class.is-invalid]="mostrarReprogError('hora')">
+                  @if (mostrarReprogError('hora')) {
+                    <span class="invalid-feedback d-block">{{ mensajeReprogError('hora') }}</span>
+                  }
+                </div>
+                <div class="d-flex gap-2 justify-content-end">
+                  <button type="button" class="btn btn-outline-secondary" (click)="cerrarReprogramar()">Cerrar</button>
+                  <button type="submit" class="btn btn-teal" [disabled]="reprogForm.invalid && submitted">
+                    Guardar
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      }

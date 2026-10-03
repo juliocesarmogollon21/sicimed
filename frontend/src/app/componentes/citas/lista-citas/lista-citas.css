@@ -1,0 +1,142 @@
+
+.lista-citas-page { max-width: 1400px; }
+
+.citas-table thead th {
+  background: #f9fafb;
+  color: var(--sic-text-muted);
+}
+
+
+.legend { font-size: 0.82rem; color: var(--sic-text-muted); }
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.legend-dot {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 2px;
+  display: inline-block;
+}
+.legend-dot.pendiente { background: var(--sic-warning); }
+.legend-dot.atendido { background: var(--sic-success); }
+.legend-dot.cancelado { background: #9ca3af; }
+
+/* ---------- Calendario semanal ---------- */
+.week-calendar { overflow: hidden; }
+.week-grid-wrap { overflow-x: auto; }
+.week-grid {
+  display: grid;
+  grid-template-columns: 64px repeat(7, minmax(120px, 1fr));
+  min-width: 920px;
+  border: 1px solid var(--sic-border);
+  border-radius: var(--sic-radius-sm);
+  overflow: hidden;
+}
+.week-corner {
+  background: #f9fafb;
+  border-bottom: 1px solid var(--sic-border);
+  border-right: 1px solid var(--sic-border);
+}
+.week-day-head {
+  text-align: center;
+  padding: 0.5rem 0.25rem;
+  background: #f9fafb;
+  border-bottom: 1px solid var(--sic-border);
+  border-right: 1px solid var(--sic-border);
+}
+.week-day-head:last-child { border-right: 0; }
+.week-dow {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: var(--sic-text-muted);
+  font-weight: 600;
+}
+.week-dom { font-size: 1.05rem; font-weight: 600; color: var(--sic-text); }
+.week-today { background: var(--sic-primary-soft) !important; }
+.week-today .week-dom {
+  display: inline-flex;
+  width: 1.75rem; height: 1.75rem;
+  align-items: center; justify-content: center;
+  border-radius: var(--sic-radius-sm);
+  background: var(--sic-primary); color: #fff;
+}
+.week-hour {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--sic-text-muted);
+  padding: 0.35rem 0.4rem;
+  background: #f9fafb;
+  border-top: 1px solid var(--sic-border);
+  border-right: 1px solid var(--sic-border);
+  text-align: right;
+}
+.week-cell {
+  min-height: 3.4rem;
+  border-top: 1px solid var(--sic-border);
+  border-right: 1px solid #f1f3f5;
+  padding: 0.2rem;
+  background: #fff;
+}
+.week-cell:nth-child(8n) { border-right: 0; }
+.week-today-col { background: #fbfdfd; }
+
+.cal-bar {
+  border-radius: var(--sic-radius-sm);
+  padding: 0.25rem 0.35rem;
+  margin-bottom: 0.2rem;
+  border: 1px solid transparent;
+  font-size: 0.72rem;
+  line-height: 1.25;
+  cursor: default;
+}
+.cal-bar-pendiente { background: #fdf7ef; border-color: #e8c89a; box-shadow: inset 3px 0 0 var(--sic-warning); }
+.cal-bar-atendido  { background: #f1f9f3; border-color: #a9d5b8; box-shadow: inset 3px 0 0 var(--sic-success); }
+.cal-bar-cancelado { background: #f3f4f6; border-color: var(--sic-border-strong); box-shadow: inset 3px 0 0 #9ca3af; }
+.cal-bar-otro      { background: #f9fafb; border-color: var(--sic-border-strong); }
+.cal-bar-time { font-weight: 700; color: #374151; }
+.cal-bar-title { font-weight: 600; }
+.cal-bar-sub { color: var(--sic-text-muted); }
+.cal-bar-actions { margin-top: 0.2rem; display: flex; flex-wrap: wrap; gap: 0.15rem; }
+.cal-bar-actions .btn { font-size: 0.68rem; }
+
+.label-soft {
+  display: inline-block;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sic-text-muted);
+  margin-right: 0.35rem;
+  font-weight: 600;
+}
+
+/* ---------- Modales ---------- */
+.modal-backdrop-sic {
+  position: fixed; inset: 0;
+  background: rgba(31, 41, 55, 0.42);
+  z-index: 1040;
+}
+.modal-panel-sic {
+  position: fixed; inset: 0;
+  z-index: 1050;
+  display: flex; align-items: center; justify-content: center;
+  padding: 1rem;
+  pointer-events: none;
+}
+.modal-panel-inner {
+  pointer-events: auto;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow: auto;
+  box-shadow: 0 12px 32px rgba(31, 41, 55, 0.18);
+}
+.modal-panel-inner .card-header {
+  background: #fff;
+  border-bottom: 1px solid var(--sic-border);
+  padding: 0.75rem 1rem;
+}
+
+.texto-pre { white-space: pre-wrap; }
+.modal-panel-inner.modal-panel-sm { max-width: 440px; }

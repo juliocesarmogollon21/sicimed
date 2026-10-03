@@ -1,0 +1,135 @@
+<div class="container py-4 cfg-page">
+  <div class="cfg-topbar">
+    <div>
+      <a routerLink="/admin" class="cfg-volver">Volver al menú de configuración</a>
+      <h2 class="page-title">Usuarios</h2>
+      <p class="page-sub">Cuentas, roles y estado de acceso</p>
+    </div>
+    <button type="button" class="btn btn-teal" (click)="abrirNuevo()">Nuevo usuario</button>
+  </div>
+
+  <app-alerta [mensaje]="error" tipo="danger" (cerrar)="error = ''" />
+  <app-alerta [mensaje]="mensaje" tipo="success" (cerrar)="mensaje = ''" />
+
+  <div class="card">
+    <div class="card-body">
+      <div class="table mb-0-responsive">
+        <table class="table mb-0 table-hover align-middle">
+          <thead>
+            <tr><th>Usuario</th><th>Nombre</th><th>Rol</th><th>Estado</th><th class="text-end">Acciones</th></tr>
+          </thead>
+          <tbody>
+            @for (u of usuarios; track u.id) {
+              <tr>
+                <td class="fw-semibold">{{ u.username }}</td>
+                <td>{{ u.nombreCompleto }}</td>
+                <td><span class="badge-rol">{{ u.rol }}</span></td>
+                <td>
+                  <span [class]="u.activo !== false ? 'cfg-badge-activo' : 'cfg-badge-inactivo'">
+                    {{ u.activo !== false ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td class="text-end text-nowrap">
+                  <button class="btn btn-outline-teal btn-sm me-1" (click)="editar(u)">Editar</button>
+                  @if (u.activo !== false) {
+                    <button class="btn btn-outline-danger btn-sm" (click)="desactivar(u)">Desactivar</button>
+                  }
+                  @if (u.activo === false) {
+                    <button class="btn btn-outline-success btn-sm" (click)="activar(u)">Activar</button>
+                  }
+                </td>
+              </tr>
+            }
+            @if (usuarios.length===0) {
+              <tr>
+                <td colspan="5" class="text-muted text-center py-4">Sin usuarios</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  @if (modalOpen) {
+    <div class="cfg-backdrop" (click)="cerrar()">
+      <div class="cfg-modal" (click)="$event.stopPropagation()">
+        <div class="cfg-modal-header">
+          <h5>{{ editandoId ? 'Editar usuario' : 'Nuevo usuario' }}</h5>
+          <button type="button" class="btn-close" (click)="cerrar()" aria-label="Cerrar"></button>
+        </div>
+        <div class="cfg-modal-body">
+          <form [formGroup]="form" novalidate>
+            <div class="mb-3">
+              <label class="form-label" for="usr-username">Usuario</label>
+              <input id="usr-username" type="text" class="form-control" formControlName="username"
+                autocomplete="off" placeholder="usuario123" [class.is-invalid]="mostrarError('username')">
+                @if (mostrarError('username')) {
+                  <span class="invalid-feedback d-block">{{ mensajeError('username') }}</span>
+                }
+              </div>
+              <div class="mb-3">
+                <label class="form-label" for="usr-password">
+                  Contraseña
+                  @if (editandoId) {
+                    <span class="text-muted fw-normal">(déjala vacía para no cambiarla)</span>
+                  }
+                </label>
+                <input id="usr-password" type="password" class="form-control" formControlName="password"
+                  autocomplete="new-password" placeholder="Mínimo 6 caracteres"
+                  [class.is-invalid]="mostrarError('password')">
+                  @if (mostrarError('password')) {
+                    <span class="invalid-feedback d-block">{{ mensajeError('password') }}</span>
+                  }
+                </div>
+                <div class="mb-3">
+                  <label class="form-label" for="usr-nombre">Nombre completo</label>
+                  <input id="usr-nombre" type="text" class="form-control" formControlName="nombreCompleto"
+                    placeholder="Nombres y apellidos" [class.is-invalid]="mostrarError('nombreCompleto')">
+                    @if (mostrarError('nombreCompleto')) {
+                      <span class="invalid-feedback d-block">{{ mensajeError('nombreCompleto') }}</span>
+                    }
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label" for="usr-email">Email <span class="text-muted fw-normal">(opcional)</span></label>
+                    <input id="usr-email" type="email" class="form-control" formControlName="email"
+                      placeholder="correo@dominio.com" [class.is-invalid]="mostrarError('email')">
+                      @if (mostrarError('email')) {
+                        <span class="invalid-feedback d-block">{{ mensajeError('email') }}</span>
+                      }
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label" for="usr-rol">Rol</label>
+                      <select id="usr-rol" class="form-select" formControlName="rol" [class.is-invalid]="mostrarError('rol')">
+                        @for (r of roles; track r) {
+                          <option [value]="r">{{ r }}</option>
+                        }
+                      </select>
+                      @if (mostrarError('rol')) {
+                        <span class="invalid-feedback d-block">{{ mensajeError('rol') }}</span>
+                      }
+                    </div>
+                    @if (editandoId) {
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" formControlName="activo" id="userActivo">
+                        <label class="form-check-label" for="userActivo">Usuario activo</label>
+                      </div>
+                    }
+                    @if (pistaBloqueo(); as pista) {
+                      <div class="alert alert-warning d-flex gap-2 py-2 small mt-3">
+                        <span aria-hidden="true">!</span>
+                        <span>{{ pista }}</span>
+                      </div>
+                    }
+                  </form>
+                </div>
+                <div class="cfg-modal-footer">
+                  <button type="button" class="btn btn-outline-secondary" (click)="cerrar()">Cancelar</button>
+                  <button type="button" class="btn btn-teal" (click)="guardar()" [disabled]="form.invalid && submitted">
+                    Guardar
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
+        </div>

@@ -1,0 +1,276 @@
+/* ============================================================
+   SICIMED - Policlinico San Rafael
+   Hoja de estilos global. Bootstrap 5.3 se registra en angular.json
+   ("styles"); aqui no se sobrescriben sus componentes (.btn,
+   .form-control, .card, .table, .alert). Solo contiene la identidad
+   institucional y el layout que Bootstrap no trae.
+   ============================================================ */
+
+:root {
+  /* Color institucional */
+  --sic-primary: #0f766e;
+  --sic-primary-dark: #0b5a54;
+  --sic-primary-soft: #e6f2f1;
+  --sic-primary-border: #bcd9d6;
+
+  /* Neutros */
+  --sic-bg: #f5f7fa;
+  --sic-surface: #ffffff;
+  --sic-border: #e5e7eb;
+  --sic-border-strong: #d1d5db;
+  --sic-text: #1f2937;
+  --sic-text-muted: #6b7280;
+  --sic-text-soft: #9ca3af;
+
+  /* Semanticos */
+  --sic-danger: #dc2626;
+  --sic-success: #15803d;
+  --sic-warning: #b45309;
+  --sic-info: #1d4ed8;
+
+  /* Metricas */
+  --sic-radius: 6px;
+  --sic-radius-sm: 4px;
+  --sic-shadow: 0 1px 2px rgba(31, 41, 55, 0.06);
+  --sic-shadow-lift: 0 2px 6px rgba(31, 41, 55, 0.10);
+  --sic-tx: 150ms ease-in-out;
+
+  /* Tema de Bootstrap mediante sus propias variables CSS.
+     --bs-body-bg NO se cambia: Bootstrap lo usa como fondo de inputs y cards. */
+  --bs-body-color: #1f2937;
+  --bs-link-color-rgb: 15, 118, 110;
+  --bs-link-hover-color-rgb: 11, 90, 84;
+}
+
+html, body {
+  height: 100%;
+}
+
+/* Fondo gris claro solo para el lienzo de la pagina */
+body {
+  background-color: var(--sic-bg);
+}
+
+/* ---------- Marca ---------- */
+.brand-mark {
+  display: inline-flex;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--sic-radius-sm);
+  background: var(--sic-primary);
+  color: #fff;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.text-teal { color: var(--sic-primary) !important; }
+.link-teal { color: var(--sic-primary); text-decoration: none; }
+.link-teal:hover { color: var(--sic-primary-dark); text-decoration: underline; }
+
+/* ---------- Variante de boton institucional ----------
+   Se define con las variables --bs-btn-* (forma documentada por Bootstrap
+   para crear variantes) en lugar de reescribir .btn. */
+.btn-teal {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--sic-primary);
+  --bs-btn-border-color: var(--sic-primary);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--sic-primary-dark);
+  --bs-btn-hover-border-color: var(--sic-primary-dark);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--sic-primary-dark);
+  --bs-btn-active-border-color: var(--sic-primary-dark);
+  --bs-btn-disabled-color: #fff;
+  --bs-btn-disabled-bg: #9fb5b3;
+  --bs-btn-disabled-border-color: #9fb5b3;
+}
+.btn-outline-teal {
+  --bs-btn-color: var(--sic-primary);
+  --bs-btn-border-color: var(--sic-primary-border);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--sic-primary);
+  --bs-btn-hover-border-color: var(--sic-primary);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--sic-primary-dark);
+  --bs-btn-active-border-color: var(--sic-primary-dark);
+}
+
+/* ---------- Tarjetas de acceso (dashboard / configuracion) ---------- */
+.card-action {
+  background: var(--sic-surface);
+  border: 1px solid var(--sic-border);
+  border-radius: var(--sic-radius);
+  box-shadow: var(--sic-shadow);
+  transition: border-color var(--sic-tx), box-shadow var(--sic-tx), background-color var(--sic-tx);
+}
+.card-action:hover {
+  border-color: var(--sic-primary-border);
+  box-shadow: var(--sic-shadow-lift);
+  background: #fcfefe;
+}
+
+.hero-health {
+  border: 1px solid var(--sic-border);
+  border-radius: var(--sic-radius);
+  overflow: hidden;
+  background: var(--sic-surface);
+  box-shadow: var(--sic-shadow);
+}
+.hero-health img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  display: block;
+}
+
+/* ---------- Encabezado de página ---------- */
+.page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.1rem;
+}
+.page-eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sic-text-muted);
+  font-weight: 600;
+  margin: 0 0 0.15rem;
+}
+.page-title {
+  font-size: 1.45rem;
+  font-weight: 600;
+  color: var(--sic-text);
+  margin: 0;
+}
+.page-sub {
+  font-size: 0.85rem;
+  color: var(--sic-text-muted);
+  margin: 0.15rem 0 0;
+}
+
+
+/* ---------- Chip de hora (citas y agenda) ---------- */
+.hora-chip {
+  display: inline-block;
+  padding: 0.15rem 0.45rem;
+  border: 1px solid var(--sic-primary-border);
+  border-radius: var(--sic-radius-sm);
+  background: var(--sic-primary-soft);
+  color: var(--sic-primary);
+  font-weight: 600;
+  font-size: 0.82rem;
+}
+
+/* ---------- Rol de usuario ---------- */
+.badge-rol {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--sic-radius-sm);
+  border: 1px solid var(--sic-primary-border);
+  color: var(--sic-primary);
+  background: var(--sic-primary-soft);
+}
+
+/* ---------- Accesibilidad: inicio de autenticación ---------- */
+.auth-split {
+  min-height: 100dvh;
+  height: 100dvh;
+  display: grid;
+  grid-template-columns: 1fr;
+  background: var(--sic-bg);
+}
+
+@media (min-width: 992px) {
+  .auth-split {
+    grid-template-columns: 1fr 0.95fr;
+    min-height: 100dvh;
+    height: 100dvh;
+  }
+}
+
+.auth-hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--sic-primary-dark);
+}
+
+.auth-hero img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.auth-hero-overlay {
+  position: relative;
+  z-index: 1;
+  margin-top: auto;
+  padding: 2.25rem;
+  color: #fff;
+  background: rgba(11, 90, 84, 0.90);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 100%;
+}
+
+.auth-hero-overlay h1 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-bottom: 0.6rem;
+}
+
+.auth-hero-overlay p {
+  max-width: 26rem;
+  color: #d3e5e3;
+  margin-bottom: 0;
+}
+
+.auth-tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #cfe4e2;
+  border-left: 2px solid rgba(255, 255, 255, 0.5);
+  padding-left: 0.5rem;
+  margin-bottom: 0.85rem;
+  width: fit-content;
+}
+
+.auth-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.25rem;
+  overflow: auto;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--sic-surface);
+  border: 1px solid var(--sic-border);
+  border-radius: var(--sic-radius);
+  padding: 1.75rem;
+  box-shadow: var(--sic-shadow);
+}

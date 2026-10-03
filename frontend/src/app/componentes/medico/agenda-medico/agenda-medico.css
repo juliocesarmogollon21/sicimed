@@ -1,0 +1,51 @@
+
+.agenda-page { max-width: 940px; position: relative; }
+
+.cita-panel { border-left: 4px solid var(--sic-border-strong) !important; }
+.cita-panel.is-pendiente { border-left-color: var(--sic-warning) !important; }
+.cita-panel.is-atendido { border-left-color: var(--sic-success) !important; }
+
+
+.info-box {
+  background: #f9fafb;
+  border: 1px solid var(--sic-border);
+  border-radius: var(--sic-radius-sm);
+  padding: 0.65rem 0.85rem;
+}
+.info-label {
+  display: block;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--sic-text-muted);
+  margin-bottom: 0.15rem;
+  font-weight: 600;
+}
+
+.receta-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(31, 41, 55, 0.42);
+  z-index: 1040;
+}
+.receta-modal {
+  position: fixed;
+  z-index: 1050;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(720px, calc(100vw - 1.5rem));
+  max-height: calc(100vh - 2rem);
+  overflow: auto;
+  box-shadow: 0 12px 32px rgba(31, 41, 55, 0.18);
+}
+.receta-modal .card-header {
+  background: #fff;
+  border-bottom: 1px solid var(--sic-border);
+}
+.receta-fila {
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--sic-border);
+  border-radius: var(--sic-radius-sm);
+  background: #fafbfc;
+}

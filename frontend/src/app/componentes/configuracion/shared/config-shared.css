@@ -1,0 +1,95 @@
+
+/* ---------- Mosaico del hub ---------- */
+.hub-tile, .hub-card {
+  border: 1px solid var(--sic-border);
+  border-radius: var(--sic-radius);
+  background: var(--sic-surface);
+  box-shadow: var(--sic-shadow);
+  transition: border-color var(--sic-tx), box-shadow var(--sic-tx), background-color var(--sic-tx);
+}
+.hub-tile:hover, .hub-card:hover {
+  border-color: var(--sic-primary-border);
+  box-shadow: var(--sic-shadow-lift);
+  background: #fcfefe;
+}
+.hub-tile .card-title { font-size: 0.98rem; font-weight: 600; }
+.hub-tile .card-text { line-height: 1.4; }
+
+/* ---------- Encabezado de modulo ---------- */
+.cfg-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin-bottom: 1.1rem;
+}
+.cfg-volver {
+  display: inline-block;
+  font-size: 0.8rem;
+  color: var(--sic-text-muted);
+  text-decoration: none;
+  margin-bottom: .4rem;
+}
+.cfg-volver:hover { color: var(--sic-primary); text-decoration: underline; }
+
+/* ---------- Modal ---------- */
+.cfg-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(31, 41, 55, 0.42);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  overflow-y: auto;
+}
+.cfg-modal {
+  background: #fff;
+  border: 1px solid var(--sic-border);
+  border-radius: var(--sic-radius);
+  width: min(560px, 100%);
+  max-height: 90vh;
+  overflow: auto;
+  box-shadow: 0 12px 32px rgba(31, 41, 55, 0.18);
+}
+.cfg-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: .85rem 1.1rem;
+  border-bottom: 1px solid var(--sic-border);
+}
+.cfg-modal-header h5 { font-size: 1rem; font-weight: 600; margin: 0; }
+.cfg-modal-body { padding: 1.1rem; }
+.cfg-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: .5rem;
+  padding: .85rem 1.1rem;
+  border-top: 1px solid var(--sic-border);
+  background: #fafbfc;
+}
+
+/* ---------- Estados (badges rectangulares) ---------- */
+.cfg-badge-activo,
+.cfg-badge-inactivo {
+  display: inline-block;
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding: .2rem .5rem;
+  border-radius: var(--sic-radius-sm);
+}
+.cfg-badge-activo {
+  color: var(--sic-success);
+  border: 1px solid #a9d5b8;
+  background: #f1f9f3;
+}
+.cfg-badge-inactivo {
+  color: #4b5563;
+  border: 1px solid var(--sic-border-strong);
+  background: #f3f4f6;
+}

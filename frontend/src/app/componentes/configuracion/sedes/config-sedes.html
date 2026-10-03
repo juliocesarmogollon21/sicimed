@@ -1,0 +1,110 @@
+<div class="container py-4 cfg-page">
+  <div class="cfg-topbar">
+    <div>
+      <a routerLink="/admin" class="cfg-volver">Volver al menú de configuración</a>
+      <h2 class="page-title">Sedes</h2>
+      <p class="page-sub">Locales del policlínico</p>
+    </div>
+    <button type="button" class="btn btn-teal" (click)="abrirNuevo()">Nueva sede</button>
+  </div>
+
+  <app-alerta [mensaje]="error" tipo="danger" (cerrar)="error = ''" />
+  <app-alerta [mensaje]="mensaje" tipo="success" (cerrar)="mensaje = ''" />
+
+  <div class="card">
+    <div class="card-body">
+      <div class="table mb-0-responsive">
+        <table class="table mb-0 table-hover align-middle">
+          <thead>
+            <tr><th>Nombre</th><th>Dirección</th><th>Teléfono</th><th>Estado</th><th class="text-end">Acciones</th></tr>
+          </thead>
+          <tbody>
+            @for (s of sedes; track s.id) {
+              <tr>
+                <td class="fw-semibold">{{ s.nombre }}</td>
+                <td>{{ s.direccion || '—' }}</td>
+                <td>{{ s.telefono || '—' }}</td>
+                <td>
+                  <span [class]="s.activo ? 'cfg-badge-activo' : 'cfg-badge-inactivo'">
+                    {{ s.activo ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td class="text-end text-nowrap">
+                  <button class="btn btn-outline-teal btn-sm me-1" (click)="editar(s)">Editar</button>
+                  @if (s.activo) {
+                    <button class="btn btn-outline-danger btn-sm" (click)="desactivar(s)">Desactivar</button>
+                  }
+                  @if (!s.activo) {
+                    <button class="btn btn-outline-success btn-sm" (click)="activar(s)">Activar</button>
+                  }
+                </td>
+              </tr>
+            }
+            @if (sedes.length===0) {
+              <tr>
+                <td colspan="5" class="text-muted text-center py-4">Sin sedes registradas</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  @if (modalOpen) {
+    <div class="cfg-backdrop" (click)="cerrar()">
+      <div class="cfg-modal" (click)="$event.stopPropagation()">
+        <div class="cfg-modal-header">
+          <h5>{{ editandoId ? 'Editar sede' : 'Nueva sede' }}</h5>
+          <button type="button" class="btn-close" (click)="cerrar()" aria-label="Cerrar"></button>
+        </div>
+        <div class="cfg-modal-body">
+          <form [formGroup]="form" novalidate>
+            <div class="mb-3">
+              <label class="form-label" for="sede-nombre">Nombre</label>
+              <input id="sede-nombre" type="text" class="form-control" formControlName="nombre"
+                placeholder="Sede San Rafael" [class.is-invalid]="mostrarError('nombre')">
+                @if (mostrarError('nombre')) {
+                  <span class="invalid-feedback d-block">{{ mensajeError('nombre') }}</span>
+                }
+              </div>
+              <div class="mb-3">
+                <label class="form-label" for="sede-direccion">Dirección</label>
+                <input id="sede-direccion" type="text" class="form-control" formControlName="direccion"
+                  placeholder="Av.Principal 123" [class.is-invalid]="mostrarError('direccion')">
+                  @if (mostrarError('direccion')) {
+                    <span class="invalid-feedback d-block">{{ mensajeError('direccion') }}</span>
+                  }
+                </div>
+                <div class="mb-3">
+                  <label class="form-label" for="sede-telefono">Teléfono</label>
+                  <input id="sede-telefono" type="tel" inputmode="numeric" class="form-control" formControlName="telefono"
+                    placeholder="Solo números" [class.is-invalid]="mostrarError('telefono')">
+                    @if (mostrarError('telefono')) {
+                      <span class="invalid-feedback d-block">{{ mensajeError('telefono') }}</span>
+                    }
+                  </div>
+                  @if (editandoId) {
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" formControlName="activo" id="sedeActivo">
+                      <label class="form-check-label" for="sedeActivo">Sede activa</label>
+                    </div>
+                  }
+                  @if (pistaBloqueo(); as pista) {
+                    <div class="alert alert-warning d-flex gap-2 py-2 small mt-3">
+                      <span aria-hidden="true">!</span>
+                      <span>{{ pista }}</span>
+                    </div>
+                  }
+                </form>
+              </div>
+              <div class="cfg-modal-footer">
+                <button type="button" class="btn btn-outline-secondary" (click)="cerrar()">Cancelar</button>
+                <button type="button" class="btn btn-teal" (click)="guardar()" [disabled]="form.invalid && submitted">
+                  Guardar
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>

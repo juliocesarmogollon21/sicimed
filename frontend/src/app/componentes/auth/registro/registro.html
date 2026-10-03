@@ -1,0 +1,101 @@
+<div class="auth-split registro-page">
+  <aside class="auth-hero d-none d-lg-flex">
+    <img src="img/registro-clinica.jpg"
+      alt="Registro de pacientes SICIMED" loading="lazy">
+      <div class="auth-hero-overlay">
+        <span class="auth-tag">Pacientes</span>
+        <h1>Crea tu cuenta</h1>
+        <p>Regístrate para reservar citas en el Policlínico San Rafael de forma rápida y segura.</p>
+      </div>
+    </aside>
+    <section class="auth-panel">
+      <div class="auth-card">
+        <h2 class="page-title">Registro de paciente</h2>
+        <p class="page-sub mb-4">Completa tus datos para acceder a SICIMED</p>
+
+        <app-alerta [mensaje]="error" tipo="danger" (cerrar)="error = ''" />
+
+        <form [formGroup]="form" (ngSubmit)="registrar()" class="row g-3" novalidate>
+          <div class="col-12">
+            <label class="form-label" for="reg-nombre">Nombre completo</label>
+            <input id="reg-nombre" type="text" class="form-control" formControlName="nombreCompleto"
+              autocomplete="name" placeholder="Nombres y apellidos"
+              [class.is-invalid]="mostrarError('nombreCompleto')">
+              @if (mostrarError('nombreCompleto')) {
+                <span class="invalid-feedback d-block">{{ mensajeError('nombreCompleto') }}</span>
+              }
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label" for="reg-usuario">Usuario</label>
+              <input id="reg-usuario" type="text" class="form-control" formControlName="username"
+                autocomplete="username" placeholder="usuario123"
+                [class.is-invalid]="mostrarError('username')">
+                @if (mostrarError('username')) {
+                  <span class="invalid-feedback d-block">{{ mensajeError('username') }}</span>
+                }
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label" for="reg-password">Contraseña</label>
+                <input id="reg-password" type="password" class="form-control" formControlName="password"
+                  autocomplete="new-password" placeholder="Mínimo 6 caracteres"
+                  [class.is-invalid]="mostrarError('password')">
+                  @if (mostrarError('password')) {
+                    <span class="invalid-feedback d-block">{{ mensajeError('password') }}</span>
+                  }
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label" for="reg-email">Email</label>
+                  <input id="reg-email" type="email" class="form-control" formControlName="email"
+                    autocomplete="email" placeholder="correo@dominio.com"
+                    [class.is-invalid]="mostrarError('email')">
+                    @if (mostrarError('email')) {
+                      <span class="invalid-feedback d-block">{{ mensajeError('email') }}</span>
+                    }
+                  </div>
+
+                  <div class="col-md-6">
+                    <label class="form-label" for="reg-dni">DNI</label>
+                    <input id="reg-dni" type="text" inputmode="numeric" class="form-control" formControlName="dni"
+                      placeholder="71234567" maxlength="20"
+                      [class.is-invalid]="mostrarError('dni')">
+                      @if (mostrarError('dni')) {
+                        <span class="invalid-feedback d-block">{{ mensajeError('dni') }}</span>
+                      }
+                    </div>
+
+                    <div class="col-12">
+                      <label class="form-label" for="reg-telefono">Teléfono <span class="text-muted fw-normal">(opcional)</span></label>
+                      <input id="reg-telefono" type="tel" class="form-control" formControlName="telefono"
+                        autocomplete="tel" placeholder="Solo números"
+                        [class.is-invalid]="mostrarError('telefono')">
+                        @if (mostrarError('telefono')) {
+                          <span class="invalid-feedback d-block">{{ mensajeError('telefono') }}</span>
+                        }
+                      </div>
+
+                      <div class="col-12">
+                        @if (pistaBloqueo(); as pista) {
+                          <div class="alert alert-warning d-flex gap-2 py-2 small">
+                            <span aria-hidden="true">!</span>
+                            <span>{{ pista }}</span>
+                          </div>
+                        }
+                      </div>
+
+                      <div class="col-12">
+                        <button class="btn btn-teal w-100" [disabled]="cargando || (form.invalid && submitted)">
+                          {{ cargando ? 'Creando cuenta...' : 'Crear cuenta' }}
+                        </button>
+                      </div>
+                    </form>
+
+                    <p class="small text-center mt-3 mb-0 text-muted">
+                      ¿Ya tienes cuenta?
+                      <a routerLink="/login" class="link-teal fw-semibold">Iniciar sesión</a>
+                    </p>
+                  </div>
+                </section>
+              </div>

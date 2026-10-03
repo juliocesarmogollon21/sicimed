@@ -1,0 +1,10 @@
+@if (mensaje()) {
+  <div class="alert alert-dismissible fade show"
+    [class.alert-danger]="tipo() === 'danger'"
+    [class.alert-success]="tipo() === 'success'"
+    [class.alert-warning]="tipo() === 'warning'"
+    [attr.role]="tipo() === 'danger' ? 'alert' : 'status'">
+    {{ mensaje() }}
+    <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrar.emit()"></button>
+  </div>
+}

@@ -1,0 +1,45 @@
+.dash-wrap { max-width: 1180px; }
+
+.dash-welcome {
+  display: block;
+}
+.dash-welcome img {
+  height: 140px;
+  object-fit: cover;
+  display: block;
+  filter: saturate(0.85);
+}
+.dash-welcome-body {
+  padding: 1rem 1.25rem 1.15rem;
+}
+
+.stat-card {
+  background: var(--sic-surface);
+  border: 1px solid var(--sic-border);
+  border-left: 3px solid var(--sic-border-strong);
+  border-radius: var(--sic-radius);
+  padding: 0.9rem 1rem;
+  box-shadow: var(--sic-shadow);
+  height: 100%;
+}
+.stat-pendiente { border-left-color: var(--sic-warning); }
+.stat-atendido  { border-left-color: var(--sic-success); }
+.stat-cancelado { border-left-color: #9ca3af; }
+
+.stat-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--sic-text-muted);
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+.stat-value {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--sic-text);
+  line-height: 1.15;
+}
+
+.card-action .card-title { font-size: 0.98rem; font-weight: 600; }
+.card-action .card-text { line-height: 1.4; }

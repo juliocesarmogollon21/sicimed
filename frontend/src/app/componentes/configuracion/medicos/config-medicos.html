@@ -1,0 +1,144 @@
+<div class="container py-4 cfg-page">
+  <div class="cfg-topbar">
+    <div>
+      <a routerLink="/admin" class="cfg-volver">Volver al menú de configuración</a>
+      <h2 class="page-title">Médicos</h2>
+      <p class="page-sub">Vinculación de usuario, especialidad, sede y CMP</p>
+    </div>
+    <button type="button" class="btn btn-teal" (click)="abrirNuevo()">Nuevo médico</button>
+  </div>
+
+  <app-alerta [mensaje]="error" tipo="danger" (cerrar)="error = ''" />
+  <app-alerta [mensaje]="mensaje" tipo="success" (cerrar)="mensaje = ''" />
+
+  <div class="card">
+    <div class="card-body">
+      <div class="table mb-0-responsive">
+        <table class="table mb-0 table-hover align-middle">
+          <thead>
+            <tr>
+              <th>Nombre</th><th>Especialidad</th><th>Sede</th><th>CMP</th>
+              <th>Estado</th><th class="text-end">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (m of medicos; track m.id) {
+              <tr>
+                <td class="fw-semibold">{{ m.nombreCompleto }}</td>
+                <td>{{ m.especialidadNombre || '—' }}</td>
+                <td>{{ m.sedeNombre || '—' }}</td>
+                <td class="text-muted">{{ m.cmp || '—' }}</td>
+                <td>
+                  <span [class]="m.activo !== false ? 'cfg-badge-activo' : 'cfg-badge-inactivo'">
+                    {{ m.activo !== false ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td class="text-end text-nowrap">
+                  <button class="btn btn-outline-teal btn-sm me-1" (click)="editar(m)">Editar</button>
+                  @if (m.activo !== false) {
+                    <button class="btn btn-outline-danger btn-sm" (click)="desactivar(m)">Desactivar</button>
+                  }
+                  @if (m.activo === false) {
+                    <button class="btn btn-outline-success btn-sm" (click)="activar(m)">Activar</button>
+                  }
+                </td>
+              </tr>
+            }
+            @if (medicos.length===0) {
+              <tr>
+                <td colspan="6" class="text-muted text-center py-4">Sin médicos</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  @if (modalOpen) {
+    <div class="cfg-backdrop" (click)="cerrar()">
+      <div class="cfg-modal" (click)="$event.stopPropagation()">
+        <div class="cfg-modal-header">
+          <h5>{{ editandoId ? 'Editar médico' : 'Nuevo médico' }}</h5>
+          <button type="button" class="btn-close" (click)="cerrar()" aria-label="Cerrar"></button>
+        </div>
+        <div class="cfg-modal-body">
+          <form [formGroup]="form" novalidate>
+            <div class="mb-3">
+              <label class="form-label" for="med-usuario">Usuario (rol MÉDICO)</label>
+              <select id="med-usuario" class="form-select" formControlName="usuarioId"
+                [class.is-invalid]="mostrarError('usuarioId')">
+                <option [ngValue]="null">Seleccione usuario</option>
+                @for (u of usuariosMedico; track u.id) {
+                  <option [ngValue]="u.id">
+                    {{ u.username }} — {{ u.nombreCompleto }}
+                  </option>
+                }
+              </select>
+              @if (mostrarError('usuarioId')) {
+                <span class="invalid-feedback d-block">{{ mensajeError('usuarioId') }}</span>
+              }
+              @if (!mostrarError('usuarioId') && usuariosMedico.length===0) {
+                <span class="form-text">
+                  No hay usuarios con rol MÉDICO. Créalos primero en Usuarios.
+                </span>
+              }
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="med-especialidad">Especialidad</label>
+              <select id="med-especialidad" class="form-select" formControlName="especialidadId"
+                [class.is-invalid]="mostrarError('especialidadId')">
+                <option [ngValue]="null">Seleccione</option>
+                @for (e of especialidades; track e.id) {
+                  <option [ngValue]="e.id">{{ e.nombre }}</option>
+                }
+              </select>
+              @if (mostrarError('especialidadId')) {
+                <span class="invalid-feedback d-block">{{ mensajeError('especialidadId') }}</span>
+              }
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="med-sede">Sede</label>
+              <select id="med-sede" class="form-select" formControlName="sedeId"
+                [class.is-invalid]="mostrarError('sedeId')">
+                <option [ngValue]="null">Seleccione</option>
+                @for (s of sedes; track s.id) {
+                  <option [ngValue]="s.id">{{ s.nombre }}</option>
+                }
+              </select>
+              @if (mostrarError('sedeId')) {
+                <span class="invalid-feedback d-block">{{ mensajeError('sedeId') }}</span>
+              }
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="med-cmp">CMP</label>
+              <input id="med-cmp" type="text" class="form-control" formControlName="cmp"
+                placeholder="Número de colegiatura" [class.is-invalid]="mostrarError('cmp')">
+                @if (mostrarError('cmp')) {
+                  <span class="invalid-feedback d-block">{{ mensajeError('cmp') }}</span>
+                }
+              </div>
+              @if (editandoId) {
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" formControlName="activo" id="medActivo">
+                  <label class="form-check-label" for="medActivo">Médico activo</label>
+                </div>
+              }
+              @if (pistaBloqueo(); as pista) {
+                <div class="alert alert-warning d-flex gap-2 py-2 small mt-3">
+                  <span aria-hidden="true">!</span>
+                  <span>{{ pista }}</span>
+                </div>
+              }
+            </form>
+          </div>
+          <div class="cfg-modal-footer">
+            <button type="button" class="btn btn-outline-secondary" (click)="cerrar()">Cancelar</button>
+            <button type="button" class="btn btn-teal" (click)="guardar()" [disabled]="form.invalid && submitted">
+              Guardar
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  </div>

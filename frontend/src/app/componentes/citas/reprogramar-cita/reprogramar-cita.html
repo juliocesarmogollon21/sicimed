@@ -1,0 +1,139 @@
+<div class="container py-4 reprogramar-cita-page">
+  <div class="page-head">
+    <div>
+      <p class="page-eyebrow">Gestión de turnos</p>
+      <h2 class="page-title">Reprogramar cita</h2>
+      @if (auth.hasRole('PACIENTE')) {
+        <p class="page-sub">Cambia la fecha, hora, sede o médico de tu cita pendiente.</p>
+      }
+      @if (esRecepcion) {
+        <p class="page-sub">Puedes reasignar médico, sede, horario e incluso el paciente por DNI.</p>
+      }
+    </div>
+  </div>
+
+  @if (cargando) {
+    <div class="text-muted">Cargando...</div>
+  }
+  <app-alerta [mensaje]="error" tipo="danger" (cerrar)="error = ''" />
+  <app-alerta [mensaje]="ok" tipo="success" (cerrar)="ok = ''" />
+
+  @if (!cargando && citaId) {
+    <form [formGroup]="form" (ngSubmit)="guardar()" class="card" novalidate>
+      <div class="card-body">
+        @if (esRecepcion) {
+          <div class="mb-3">
+            <label class="form-label" for="rp-paciente-actual">Paciente actual</label>
+            <input id="rp-paciente-actual" class="form-control mb-3" [value]="pacienteNombre" disabled>
+            <label class="form-label" for="rp-dni">Reasignar por DNI (opcional)</label>
+            <div class="input-group">
+              <input id="rp-dni" type="text" inputmode="numeric" class="form-control" formControlName="dniBusqueda"
+                placeholder="71234567" [class.is-invalid]="mostrarError('dniBusqueda')">
+                <button type="button" class="btn btn-outline-teal" (click)="buscarPaciente()">Buscar</button>
+              </div>
+              @if (mostrarError('dniBusqueda')) {
+                <span class="invalid-feedback d-block">{{ mensajeError('dniBusqueda') }}</span>
+              }
+              @if (!mostrarError('dniBusqueda')) {
+                <span class="form-text">
+                  Si dejas el DNI vacío se mantiene el paciente actual.
+                </span>
+              }
+            </div>
+          }
+          @if (!esRecepcion) {
+            <div class="mb-3">
+              <label class="form-label" for="rp-paciente">Paciente</label>
+              <input id="rp-paciente" class="form-control" [value]="pacienteNombre" disabled>
+            </div>
+          }
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label" for="rp-sede">Sede</label>
+              <select id="rp-sede" class="form-select" formControlName="sedeId"
+                [class.is-invalid]="mostrarError('sedeId')" (change)="onFiltroChange()">
+                <option [ngValue]="null">Seleccione...</option>
+                @for (s of sedes; track s.id) {
+                  <option [ngValue]="s.id">{{ s.nombre }}</option>
+                }
+              </select>
+              @if (mostrarError('sedeId')) {
+                <span class="invalid-feedback d-block">{{ mensajeError('sedeId') }}</span>
+              }
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="rp-especialidad">Especialidad</label>
+              <select id="rp-especialidad" class="form-select" formControlName="especialidadId"
+                (change)="onFiltroChange()">
+                <option [ngValue]="null">Todas / seleccione...</option>
+                @for (e of especialidades; track e.id) {
+                  <option [ngValue]="e.id">{{ e.nombre }}</option>
+                }
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label" for="rp-medico">Médico</label>
+              <select id="rp-medico" class="form-select" formControlName="medicoId"
+                [class.is-invalid]="mostrarError('medicoId')" (change)="onFechaMedicoChange()">
+                <option [ngValue]="null">Seleccione...</option>
+                @for (m of medicos; track m.id) {
+                  <option [ngValue]="m.id">{{ m.nombreCompleto }} ({{ m.especialidadNombre }})</option>
+                }
+              </select>
+              @if (mostrarError('medicoId')) {
+                <span class="invalid-feedback d-block">{{ mensajeError('medicoId') }}</span>
+              }
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="rp-fecha">Nueva fecha</label>
+              <input id="rp-fecha" type="date" class="form-control" formControlName="fecha"
+                [min]="fechaMinima" [class.is-invalid]="mostrarError('fecha')"
+                (change)="onFechaMedicoChange()">
+                @if (mostrarError('fecha')) {
+                  <span class="invalid-feedback d-block">{{ mensajeError('fecha') }}</span>
+                }
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="rp-hora">Nueva hora</label>
+                <select id="rp-hora" class="form-select" formControlName="hora"
+                  [class.is-invalid]="mostrarError('hora')">
+                  <option value="">Seleccione...</option>
+                  @for (h of horas; track h) {
+                    <option [value]="h">{{ h }}</option>
+                  }
+                </select>
+                @if (mostrarError('hora')) {
+                  <span class="invalid-feedback d-block">{{ mensajeError('hora') }}</span>
+                }
+                @if (!mostrarError('hora') && !horas.length) {
+                  <span class="form-text">
+                    Elige médico y fecha para ver los horarios libres.
+                  </span>
+                }
+              </div>
+              <div class="col-12">
+                <label class="form-label" for="rp-motivo">Motivo de la consulta</label>
+                <textarea id="rp-motivo" class="form-control" rows="3" formControlName="motivo"
+                  placeholder="Describe brevemente el motivo (mínimo 10 caracteres)"
+                [class.is-invalid]="mostrarError('motivo')"></textarea>
+                @if (mostrarError('motivo')) {
+                  <span class="invalid-feedback d-block">{{ mensajeError('motivo') }}</span>
+                }
+              </div>
+            </div>
+            @if (pistaBloqueo(); as pista) {
+              <div class="alert alert-warning d-flex gap-2 py-2 small mt-3">
+                <span aria-hidden="true">!</span>
+                <span>{{ pista }}</span>
+              </div>
+            }
+          </div>
+          <div class="card-footer bg-transparent d-flex gap-2 justify-content-end">
+            <a routerLink="/citas" class="btn btn-outline-secondary">Volver</a>
+            <button class="btn btn-teal" type="submit" [disabled]="form.invalid && submitted">
+              Guardar reprogramación
+            </button>
+          </div>
+        </form>
+      }
+    </div>

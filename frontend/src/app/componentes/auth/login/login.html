@@ -1,0 +1,63 @@
+<div class="auth-split login-page">
+  <aside class="auth-hero d-none d-lg-flex">
+    <img src="img/login-clinica.jpg"
+      alt="Atención médica SICIMED" loading="lazy">
+      <div class="auth-hero-overlay">
+        <span class="auth-tag">SICIMED</span>
+        <h1>Policlínico San Rafael</h1>
+        <p>Sedes, especialidades y agenda médica en una sola plataforma para pacientes y personal clínico.</p>
+      </div>
+    </aside>
+    <section class="auth-panel">
+      <div class="auth-card">
+        <div class="d-flex align-items-center gap-2 mb-4">
+          <span class="brand-mark" aria-hidden="true">+</span>
+          <div>
+            <h2 class="page-title">Iniciar sesión</h2>
+            <p class="page-sub">Acceso al sistema de gestión clínica</p>
+          </div>
+        </div>
+
+        <app-alerta [mensaje]="error" tipo="danger" (cerrar)="error = ''" />
+
+        <form [formGroup]="form" (ngSubmit)="ingresar()" novalidate>
+          <div class="mb-3">
+            <label class="form-label" for="login-usuario">Usuario</label>
+            <input id="login-usuario" type="text" class="form-control" formControlName="username"
+              autocomplete="username" placeholder="Tu usuario"
+              [class.is-invalid]="mostrarError('username')">
+              @if (mostrarError('username')) {
+                <span class="invalid-feedback d-block">{{ mensajeError('username') }}</span>
+              }
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="login-password">Contraseña</label>
+              <input id="login-password" type="password" class="form-control" formControlName="password"
+                autocomplete="current-password" placeholder="Tu contraseña"
+                [class.is-invalid]="mostrarError('password')">
+                @if (mostrarError('password')) {
+                  <span class="invalid-feedback d-block">{{ mensajeError('password') }}</span>
+                }
+              </div>
+
+              @if (pistaBloqueo(); as pista) {
+                <div class="alert alert-warning d-flex gap-2 py-2 small mb-3">
+                  <span aria-hidden="true">!</span>
+                  <span>{{ pista }}</span>
+                </div>
+              }
+
+              <button class="btn btn-teal btn-lg w-100"
+                [disabled]="cargando || (form.invalid && submitted)">
+                {{ cargando ? 'Ingresando...' : 'Ingresar' }}
+              </button>
+            </form>
+
+            <p class="small text-center mt-4 mb-0 text-muted">
+              ¿Eres paciente nuevo?
+              <a routerLink="/registro" class="link-teal fw-semibold">Crear cuenta de paciente</a>
+            </p>
+          </div>
+        </section>
+      </div>

@@ -1,0 +1,223 @@
+<div class="agenda-page">
+  <div class="page-head">
+    <div>
+      <p class="page-eyebrow">Consulta clínica</p>
+      <h2 class="page-title">Agenda médico</h2>
+      <p class="page-sub">Diagnóstico obligatorio. La receta es opcional y se agrega aparte.</p>
+    </div>
+  </div>
+
+  <app-alerta [mensaje]="error" tipo="danger" (cerrar)="error = ''" />
+  <app-alerta [mensaje]="mensaje" tipo="success" (cerrar)="mensaje = ''" />
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="row g-2 align-items-end">
+        <div class="col-md-4">
+          <label class="form-label" for="ag-medico">Médico</label>
+          <select id="ag-medico" class="form-select" [(ngModel)]="medicoId" name="medicoId"
+            [disabled]="esMedicoSesion()">
+            <option [ngValue]="null">Seleccione...</option>
+            @for (m of medicos; track m.id) {
+              <option [ngValue]="m.id">{{ m.nombreCompleto }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label" for="ag-fecha">Fecha</label>
+          <input id="ag-fecha" type="date" class="form-control" [(ngModel)]="fecha" name="fecha">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label" for="ag-filtro">Buscar paciente</label>
+          <input id="ag-filtro" type="text" class="form-control" [(ngModel)]="filtroPaciente"
+            name="filtroPaciente" placeholder="Nombre del paciente">
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-teal w-100" type="button" (click)="consultar()" [disabled]="cargando">
+              {{ cargando ? 'Consultando...' : 'Consultar' }}
+            </button>
+          </div>
+        </div>
+        <div class="d-flex flex-wrap gap-2 align-items-center mt-3">
+          <div class="btn-group" role="group">
+            <button type="button" class="btn btn-sm"
+              [class.btn-teal]="panel==='por_atender'"
+              [class.btn-outline-teal]="panel!=='por_atender'"
+            (click)="panel='por_atender'">Por atender ({{ countPendientes }})</button>
+            <button type="button" class="btn btn-sm"
+              [class.btn-teal]="panel==='atendidos'"
+              [class.btn-outline-teal]="panel!=='atendidos'"
+            (click)="panel='atendidos'">Atendidos ({{ countAtendidos }})</button>
+          </div>
+          <select class="form-select form-select-sm w-auto" aria-label="Ordenar por"
+            [(ngModel)]="orden" name="orden">
+            <option value="hora">Orden: hora</option>
+            <option value="paciente">Orden: paciente</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="vstack gap-3">
+      @for (c of citasFiltradas; track c.id) {
+        <div class="card cita-panel"
+          [class.is-pendiente]="c.estado==='PENDIENTE'"
+          [class.is-atendido]="c.estado==='ATENDIDO'">
+          <div class="card-body">
+            <div class="d-flex justify-content-between flex-wrap gap-2 mb-3">
+              <div>
+                <span class="hora-chip">{{ c.fecha }} - {{ c.hora }}</span>
+                <h3 class="h6 fw-semibold mt-2 mb-1">{{ c.pacienteNombre }}</h3>
+                <app-estado-badge [estado]="c.estado" />
+              </div>
+              <div class="text-muted small text-md-end">
+                <div class="fw-semibold text-teal">{{ c.especialidad }}</div>
+                <div>{{ c.sedeNombre }}</div>
+              </div>
+            </div>
+            @if (c.motivo) {
+              <div class="info-box mb-3">
+                <span class="info-label">Motivo</span>
+                <div>{{ c.motivo }}</div>
+              </div>
+            }
+            <!-- Por atender: solo diagnóstico -->
+            @if (panel==='por_atender' && puedeAtender(c)) {
+              <div>
+                <label class="form-label" [attr.for]="'diag'+c.id">Diagnóstico</label>
+                <textarea class="form-control mb-2" rows="3"
+                  [id]="'diag'+c.id"
+                  placeholder="Escriba el diagnóstico clínico"
+                  [class.is-invalid]="diagnosticoInvalido(c)"
+                  [(ngModel)]="diagnosticoTexto[c.id]" [name]="'diag'+c.id"
+                (blur)="toqueDiagnostico(c)"></textarea>
+                @if (diagnosticoInvalido(c)) {
+                  <span class="invalid-feedback d-block">
+                    Ingresa el diagnóstico para marcar la cita como atendida.
+                  </span>
+                }
+                <button class="btn btn-teal mt-2" type="button" (click)="guardarDiagnostico(c)">
+                  Guardar y marcar atendido
+                </button>
+                <p class="small text-muted mt-2 mb-0">
+                  La receta no es obligatoria. Si hace falta, la agregas después en Atendidos.
+                </p>
+              </div>
+            }
+            <!-- Atendidos: ver diagnóstico + receta opcional -->
+            @if (panel==='atendidos') {
+              <div>
+                @if (c.diagnostico || diagnosticoTexto[c.id]) {
+                  <div class="info-box mb-3">
+                    <span class="info-label">Diagnóstico</span>
+                    <div>{{ c.diagnostico || diagnosticoTexto[c.id] }}</div>
+                  </div>
+                }
+                @if (puedeAtender(c)) {
+                  <div class="d-flex flex-wrap gap-2">
+                    <button class="btn btn-outline-teal" type="button" (click)="abrirReceta(c)">
+                      Agregar o editar receta
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      @if (!cargando && citasFiltradas.length===0) {
+        <div class="card">
+          <div class="card-body text-center py-5 text-muted">
+            @if (panel==='por_atender') {
+              <p class="mb-0">No hay citas pendientes con ese filtro.</p>
+            }
+            @if (panel==='atendidos') {
+              <p class="mb-0">Aún no hay citas atendidas en esta fecha.</p>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Modal receta -->
+  @if (showRecetaModal && citaReceta) {
+    <div class="receta-backdrop" (click)="cerrarReceta()"></div>
+  }
+  @if (showRecetaModal && citaReceta) {
+    <div class="receta-modal card" role="dialog" aria-modal="true">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <div>
+          <strong class="text-teal">Receta digital</strong>
+          <div class="small text-muted">{{ citaReceta.pacienteNombre }} - {{ citaReceta.fecha }} {{ citaReceta.hora }}</div>
+        </div>
+        <button type="button" class="btn-close" (click)="cerrarReceta()" aria-label="Cerrar"></button>
+      </div>
+      <div class="card-body">
+        <app-alerta [mensaje]="recetaGuardadaMsg" tipo="success" (cerrar)="recetaGuardadaMsg = ''" />
+        <span class="form-label d-block">Medicamentos</span>
+        @for (it of itemsDe(citaReceta.id); track $index; let i = $index) {
+          <div class="receta-fila mb-2">
+            <div class="row g-1 align-items-end">
+              <div class="col-md-3">
+                <label class="form-label small mb-0" [attr.for]="'cat'+citaReceta.id+'_'+i">Catálogo</label>
+                <select class="form-select form-select-sm" [id]="'cat'+citaReceta.id+'_'+i"
+                  [ngModel]="it.medicamentoId || ''"
+                  (ngModelChange)="onPickCatalogo(citaReceta!.id, i, $event)"
+                  [name]="'cat'+citaReceta.id+'_'+i">
+                  <option value="">Escribir nombre</option>
+                  @for (m of catalogo; track m.id) {
+                    <option [value]="m.id">{{ m.nombre }}</option>
+                  }
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small mb-0" [attr.for]="'nom'+citaReceta.id+'_'+i">Nombre</label>
+                <input class="form-control form-control-sm" [id]="'nom'+citaReceta.id+'_'+i"
+                  [(ngModel)]="it.nombre" [name]="'nom'+citaReceta.id+'_'+i"
+                  [class.is-invalid]="sinMedicamentos()">
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label small mb-0" [attr.for]="'dos'+citaReceta.id+'_'+i">Dosis</label>
+                  <input class="form-control form-control-sm" [id]="'dos'+citaReceta.id+'_'+i"
+                    [(ngModel)]="it.dosis" [name]="'dos'+citaReceta.id+'_'+i" placeholder="1 tab">
+                  </div>
+                  <div class="col-md-2">
+                    <label class="form-label small mb-0" [attr.for]="'fre'+citaReceta.id+'_'+i">Frecuencia</label>
+                    <input class="form-control form-control-sm" [id]="'fre'+citaReceta.id+'_'+i"
+                      [(ngModel)]="it.frecuencia" [name]="'fre'+citaReceta.id+'_'+i" placeholder="c/8h">
+                    </div>
+                    <div class="col-md-2">
+                      <button type="button" class="btn btn-sm btn-outline-danger w-100"
+                        [attr.aria-label]="'Quitar medicamento ' + (i+1)"
+                      (click)="quitarFila(citaReceta!.id, i)">Quitar</button>
+                    </div>
+                  </div>
+                </div>
+              }
+              @if (sinMedicamentos()) {
+                <span class="invalid-feedback d-block mb-2">
+                  Agrega al menos un medicamento con nombre.
+                </span>
+              }
+              <button type="button" class="btn btn-sm btn-outline-teal mb-3"
+              (click)="agregarFila(citaReceta.id)">Agregar medicamento</button>
+              <label class="form-label d-block" [attr.for]="'ind'+citaReceta.id">Indicaciones generales</label>
+              <textarea class="form-control mb-2" rows="2" [id]="'ind'+citaReceta.id"
+                placeholder="Indicaciones para el paciente"
+                [class.is-invalid]="indicacionesInvalidas(citaReceta.id)"
+                [(ngModel)]="recetaInd[citaReceta.id]" [name]="'ind'+citaReceta.id"
+              (blur)="toqueIndicaciones(citaReceta.id)"></textarea>
+              @if (indicacionesInvalidas(citaReceta.id)) {
+                <span class="invalid-feedback d-block mb-2">
+                  Ingresa las indicaciones generales de la receta.
+                </span>
+              }
+              <div class="d-flex gap-2 justify-content-end">
+                <button type="button" class="btn btn-outline-secondary" (click)="cerrarReceta()">Cerrar</button>
+                <button type="button" class="btn btn-teal" (click)="guardarReceta()">Guardar receta</button>
+              </div>
+            </div>
+          </div>
+        }

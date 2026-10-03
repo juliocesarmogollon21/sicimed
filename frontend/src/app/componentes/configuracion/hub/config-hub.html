@@ -1,0 +1,22 @@
+<div class="container py-4 cfg-page">
+  <div class="page-head">
+    <div>
+      <p class="page-eyebrow">Administración</p>
+      <h2 class="page-title">Configuración</h2>
+      <p class="page-sub">Submódulos administrativos. Acceso exclusivo para el rol ADMIN.</p>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    @for (c of hubCards; track $index) {
+      <div class="col-md-6 col-xl-4">
+        <a class="card card-action w-100 text-start hub-tile text-decoration-none" [routerLink]="['/admin', c.path]">
+          <div class="card-body">
+            <h5 class="card-title text-teal mb-1">{{ c.title }}</h5>
+            <p class="card-text text-muted small mb-0">{{ c.desc }}</p>
+          </div>
+        </a>
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,82 @@
+<div class="app-shell" [class.app-logged]="auth.isLoggedIn()" [class.app-public]="!auth.isLoggedIn()">
+  @if (auth.isLoggedIn()) {
+    <aside class="app-sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-mark" aria-hidden="true">+</span>
+        <div>
+          <div class="sidebar-title">SICIMED</div>
+          <div class="sidebar-sub">Policlínico San Rafael</div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <span class="sidebar-seccion">Menu principal</span>
+        <a routerLink="/dashboard" routerLinkActive="active">Panel</a>
+        @if (auth.hasRole('ADMIN','RECEPCIONISTA','PACIENTE','MEDICO')) {
+          <a routerLink="/citas" routerLinkActive="active"
+          >Citas</a>
+        }
+        @if (auth.hasRole('ADMIN','RECEPCIONISTA','PACIENTE')) {
+          <a routerLink="/nueva-cita" routerLinkActive="active"
+          >Nueva cita</a>
+        }
+        @if (auth.hasRole('ADMIN','MEDICO')) {
+          <a routerLink="/agenda-medico" routerLinkActive="active"
+          >Agenda</a>
+        }
+        @if (auth.hasRole('ADMIN')) {
+          <a routerLink="/admin" routerLinkActive="active"
+          >Configuración</a>
+        }
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">{{ auth.session()?.nombreCompleto }}</div>
+        <span class="badge-rol sidebar-rol">{{ auth.rol() }}</span>
+        <button class="btn btn-outline-light btn-sm w-100 mt-3" (click)="logout()">Cerrar sesión</button>
+      </div>
+    </aside>
+  }
+
+  <div class="app-main">
+    @if (auth.isLoggedIn()) {
+      <header class="app-topbar d-lg-none">
+        <a class="navbar-brand fw-semibold d-flex align-items-center gap-2" routerLink="/dashboard">
+          <span class="brand-mark" aria-hidden="true">+</span> SICIMED
+        </a>
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge-rol d-none d-sm-inline-block">{{ auth.rol() }}</span>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navSicimed"
+            aria-controls="navSicimed" aria-expanded="false" aria-label="Alternar menu">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+        </div>
+        <div class="collapse navbar-collapse w-100" id="navSicimed">
+          <div class="navbar-nav gap-1 pt-2">
+            <a class="nav-link" routerLink="/dashboard" routerLinkActive="active">Panel</a>
+            @if (auth.hasRole('ADMIN','RECEPCIONISTA','PACIENTE','MEDICO')) {
+              <a class="nav-link" routerLink="/citas" routerLinkActive="active"
+              >Citas</a>
+            }
+            @if (auth.hasRole('ADMIN','RECEPCIONISTA','PACIENTE')) {
+              <a class="nav-link" routerLink="/nueva-cita" routerLinkActive="active"
+              >Nueva cita</a>
+            }
+            @if (auth.hasRole('ADMIN','MEDICO')) {
+              <a class="nav-link" routerLink="/agenda-medico" routerLinkActive="active"
+              >Agenda</a>
+            }
+            @if (auth.hasRole('ADMIN')) {
+              <a class="nav-link" routerLink="/admin" routerLinkActive="active"
+              >Configuración</a>
+            }
+            <div class="sidebar-user mt-2 px-2">{{ auth.session()?.nombreCompleto }}</div>
+            <button class="btn btn-outline-secondary btn-sm mt-2 text-start" (click)="logout()">Cerrar sesión</button>
+          </div>
+        </div>
+      </header>
+    }
+
+    <main class="content-area">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>
