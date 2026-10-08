@@ -139,31 +139,263 @@ git clone https://github.com/juliocesarmogollon21/sicimed.git
 cd sicimed
 ```
 
-La primera vez, en este orden:
+Hay dos formas de levantar el sistema:
 
-1. **Base de datos MySQL** — instalar MySQL 8, arrancar el servicio `MySQL80` y crear la base
-   `sicimed`: [backend/README.md → Paso 2](backend/README.md#paso-2--instalar-mysql-8-y-crear-la-base-de-datos).
-2. **Backend** — JDK 17, Tomcat 10.1 registrado en VS Code, generar `sicimed.war` y desplegarlo:
-   [backend/README.md → Puesta en marcha](backend/README.md#3-puesta-en-marcha). Comprobar que
-   http://localhost:8080/sicimed/api/sistema/estado responde `preparado: true`.
-3. **Frontend** — `npm install` y `npx ng serve` en `frontend/`:
-   [frontend/README.md → Puesta en marcha](frontend/README.md#puesta-en-marcha). Abrir http://localhost:4200.
+- **Forma principal (Opción A)** — MySQL y Tomcat, la que se usa en el laboratorio.
+- **Alternativa (Opción B)** — sin base de datos ni Tomcat, con H2 en memoria. Si no quieres
+  crear la base de datos en MySQL, ve directo a la [Opción B](#opción-b--sin-base-de-datos-ni-tomcat).
 
-Sin MySQL se puede usar el perfil `dev` con H2 en memoria:
-[backend/README.md → Perfil dev](backend/README.md#4-perfil-dev-con-h2-sin-mysql).
+**La diferencia entre ambas es la URL de la API**, porque al desplegar el WAR en Tomcat la
+aplicación queda bajo el contexto `/sicimed`:
+
+| | Opción A — MySQL + Tomcat | Opción B — H2 sin Tomcat |
+|---|---|---|
+| Base de datos | MySQL / MariaDB, base `sicimed` | H2 en memoria |
+| Backend | WAR desplegado en Tomcat | `java -jar` |
+| URL de la API | `http://localhost:8080/sicimed/api` | `http://localhost:8080/api` |
+| `apiUrl` del frontend | `http://localhost:8080/sicimed/api` | `http://localhost:8080/api` |
+| Los datos se borran al reiniciar | No | Sí, se recarga la semilla |
+
+> Si cambias de opción, cambia también `apiUrl` en
+> `frontend/src/environments/environment.development.ts`. Si no coincide, el login falla con
+> `Credenciales inválidas` aunque el backend esté funcionando.
+
+---
+
+## Opción A — MySQL y Tomcat (principal)
+
+Todos los comandos se ejecutan desde la **terminal integrada de Visual Studio Code**
+(Ctrl+` o *Terminal → Nueva terminal*).
+
+### A1. Crear la base de datos en MySQL
+
+La base debe existir antes de arrancar el backend. Si no, el despliegue falla con
+`Unknown database 'sicimed'`.
+
+> **Si ya la creaste antes, sáltate este paso.** Si al ejecutar el comando aparece
+> `ERROR 1007 (HY000): Can't create database 'sicimed'; database exists`, la base ya está creada y
+> no hay que hacer nada más.
+
+En la terminal de VS Code:
+
+```powershell
+& "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" -u root -p -e "CREATE DATABASE sicimed CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+```
+
+> El `&` al principio es obligatorio: es el operador *call* de PowerShell, que permite ejecutar una
+> ruta con espacios. Sin él aparece
+> `Token '-u' inesperado en la expresión o la instrucción`.
+
+Si tu usuario `root` **no tiene contraseña**, quita el `-p`:
+
+```powershell
+& "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" -u root -e "CREATE DATABASE sicimed CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+```
+
+Verificar que existe:
+
+```powershell
+& "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" -u root -p -e "SHOW DATABASES LIKE 'sicimed';"
+```
+
+Debe aparecer `sicimed`.
+
+> **El backend crea solo las tablas y los datos de prueba** (2 sedes, 3 especialidades, 3 médicos,
+> 4 pacientes, 6 medicamentos y 15 citas repartidas en tres semanas). La base es lo único que hay
+> que crear a mano, y solo una vez por máquina.
+
+### A2. Generar el WAR
+
+Desde el **panel de Maven de VS Code**: clic derecho sobre la carpeta `backend` →
+**Run Maven Commands...**, y ejecutar en este orden:
+
+1. **clean** — borra `target/`
+2. **package** — compila y genera `target/sicimed.war`
+
+> Ejecutar `clean` antes de `package` es importante: sin `clean`, Maven puede dejar clases de una
+> compilación anterior y el WAR se genera con código desactualizado.
+
+También se puede desde la terminal:
+
+```bash
+cd backend
+mvn clean package
+```
+
+### A3. Encender Tomcat desde VS Code
+
+En el panel **Servers** (lado izquierdo) aparece el servidor ya registrado:
+
+```
+Community Server Connector
+└── apache-tomcat-10.1.10 (Stopped)
+```
+
+Clic derecho sobre el servidor → **Start** (o el botón ▶ que aparece al seleccionarlo). El estado
+pasa a **(Started)** y el puerto **8080** queda ocupado por Tomcat.
+
+### A4. Subir el WAR con Add Deployment
+
+Clic derecho sobre el servidor Tomcat → **Add Deployment...**
+
+Se abre un cuadro de diálogo con dos campos:
+
+| Campo | Valor |
+|---|---|
+| **File** | `Select WAR File...` → `backend\target\sicimed.war` |
+| **Context path** | `/sicimed` |
+
+Pulsar **Finish**.
+
+El *context path* define la carpeta donde se publica la aplicación dentro de Tomcat, y por eso la
+URL de la API empieza por `/sicimed`.
+
+### A5. Esperar a que publique
+
+En la consola de abajo aparecen estas dos líneas, que confirman el despliegue:
+
+```
+Deployment of web application archive [webapps\sicimed.war] has finished in [...] ms
+Server startup in [...] milliseconds
+```
+
+### A6. Verificar que responde
+
+```bash
+curl http://localhost:8080/sicimed/api/sistema/estado
+```
+
+Respuesta esperada:
+
+```json
+{ "servicio": "sicimed-backend", "estado": "activo", "preparado": true, "version": "1.0.0" }
+```
+
+Swagger UI: http://localhost:8080/sicimed/swagger-ui/index.html
+
+El campo `preparado: true` confirma que la base terminó de inicializarse. El servidor acepta
+peticiones unos segundos antes de que terminen de sembrarse los datos, y un login en esa ventana
+falla.
+
+### A7. Levantar el frontend
+
+El archivo `frontend/src/environments/environment.development.ts` ya viene con
+`apiUrl: 'http://localhost:8080/sicimed/api'`, que es la URL de esta opción. No hay que cambiar nada.
+
+En la terminal de VS Code:
+
+```bash
+cd frontend
+npm install
+npx ng serve
+```
+
+Abrir http://localhost:4200 e iniciar sesión con `admin` / `admin123`.
+
+> Si más adelante pruebas la Opción B (sin Tomcat), tendrás que quitarle el `/sicimed` de `apiUrl`.
+
+### A8. Volver a desplegar tras un cambio
+
+Repetir **A2** (`clean` + `package`) y luego **A4** (*Add Deployment...*) apuntando al WAR nuevo.
+
+---
+
+## Opción B — sin base de datos ni Tomcat
+
+Si no quieres crear la base en MySQL ni usar Tomcat, el backend puede correr solo, con una base
+H2 **en memoria** que crea y destruye en cada arranque.
+
+### B1. Generar el WAR
+
+Igual que en A2: `clean` y `package` desde el panel de Maven, o `mvn clean package` en la terminal.
+
+### B2. Arrancar el backend
+
+```bash
+cd backend
+java -jar target/sicimed.war --spring.profiles.active=dev
+```
+
+El perfil `dev` reemplaza MySQL por H2 en memoria. Los datos de prueba se cargan al arrancar y se
+**pierden al apagar el servidor**.
+
+Comprobar que responde:
+
+```bash
+curl http://localhost:8080/api/sistema/estado
+```
+
+Swagger UI: http://localhost:8080/swagger-ui/index.html
+
+### B3. El frontend ya viene apuntando bien
+
+`environment.development.ts` viene con `http://localhost:8080/api`, que es la URL de esta opción.
+No hay que cambiar nada.
+
+### B4. Levantar el frontend
+
+```bash
+cd frontend
+npm install
+npx ng serve
+```
+
+Abrir http://localhost:4200 e iniciar sesión con `admin` / `admin123`.
+
+---
+
+## Problemas frecuentes
+
+| Síntoma | Causa | Solución |
+|---|---|---|
+| Login dice `Credenciales inválidas` pero `/api/sistema/estado` responde | `apiUrl` no coincide con la opción elegida | Opción A: `http://localhost:8080/sicimed/api`. Opción B: `http://localhost:8080/api` |
+| `401 No autenticado` al abrir la app | El frontend llama a `/sicimed/api` y el backend corre sin contexto | Quitar el `/sicimed` de `apiUrl` |
+| 404 en `http://localhost:8080/api/...` | El backend está en Tomcat, con contexto | Usar `http://localhost:8080/sicimed/api/...` |
+| `Unknown database 'sicimed'` en el log de Tomcat | La base no existe | Crearla con el comando de A1, o usar la Opción B |
+| `Port 8080 was already in use` | Tomcat ya está encendido o hay otro servicio | En **Servers**, comprobar el estado; detener el proceso antiguo |
+| El panel sale con todos los contadores en 0 | No hay citas registradas | La semilla carga 15 citas; si usas la Opción B, esperar `preparado: true` |
+| `preparado: false` | La base todavía se inicializa | Esperar unos segundos y volver a consultar |
+| `Deploy Failed` | El WAR está corrupto o se generó sin `clean` | Regenerar con `clean` + `package` y volver a añadir el despliegue |
+| Error de CORS en el navegador | El frontend corre en un puerto distinto de 4200 | Agregar ese origen en `SecurityConfig.setAllowedOrigins` |
+| `Failed to fetch` | El backend no está corriendo | Verificar `/api/sistema/estado` y el valor de `apiUrl` |
 
 ---
 
 ## 6. Usuarios de prueba
 
-| Usuario | Contraseña | Qué se puede probar con ese rol |
-|---|---|---|
-| `admin` | `admin123` | Configuración completa, reportes, todas las citas |
-| `recepcion` | `recep123` | Buscar paciente por DNI, agendar, reprogramar, cancelar |
-| `medico1` | `medico123` | Agenda del día, diagnóstico, receta |
-| `paciente1` | `paciente123` | Reservar y ver sus citas, ver su receta |
+| Usuario | Contraseña | Rol | Qué se puede probar |
+|---|---|---|---|
+| `admin` | `admin123` | ADMIN | Configuración completa, reportes, todas las citas |
+| `recepcion` | `recep123` | RECEPCIONISTA | Buscar paciente por DNI, agendar, reprogramar, cancelar |
+| `medico1` | `medico123` | MEDICO | Agenda del día, diagnóstico, receta |
+| `medico2` | `medico123` | MEDICO | Pediatrics, sede Norte |
+| `medico3` | `medico123` | MEDICO | Ginecología, sede Centro |
+| `paciente1` | `paciente123` | PACIENTE | María Pérez, DNI 71234567, 4 citas de ejemplo |
+| `paciente2` | `paciente123` | PACIENTE | Luis Álvarez, DNI 70112233 |
+| `paciente3` | `paciente123` | PACIENTE | Carmen Rojas, DNI 74558899 |
+| `paciente4` | `paciente123` | PACIENTE | Jorge Díaz, DNI 70990011 |
 
 También se puede crear una cuenta nueva en `/registro`, que siempre queda con rol `PACIENTE`.
+
+### Datos de ejemplo
+
+Al arrancar por primera vez, el backend carga los catálogos (2 sedes, 3 especialidades, 3 médicos,
+6 medicamentos) y **15 citas repartidas en tres semanas**, para que el sistema se pueda probar sin
+tener que agendar nada a mano:
+
+| Estado | Cuántas | Para qué sirve |
+|---|---|---|
+| `ATENDIDO` | 3 | Ver diagnóstico y receta (tienen receta emitida) |
+| `CANCELADO` | 1 | Ver el estado y comprobar que el horario se libera |
+| `PENDIENTE` | 11 | Probar agenda, reprogramación y cancelación |
+
+Las citas atendidas tienen receta con medicamentos y dosis, para comprobar el flujo completo de
+atención médica: entrar como `medico1`, ver la agenda, y abrir la receta de un paciente ya
+atendido.
+
+**Con el perfil `dev` la base H2 está en memoria:** cada vez que se reinicia el backend se borra
+todo y se vuelve a cargar la semilla. Con MySQL, la semilla solo se carga si la tabla de usuarios
+está vacía.
 
 ---
 

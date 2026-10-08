@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Prueba de humo de la API SICIMED (Spring Boot + JWT + JPA)
 # Uso: bash docs/probar_api.sh [http://localhost:8090]
+# Uso: bash docs/probar_api.sh [base]   (base SIN /api)
+#   Tomcat + MySQL  : bash docs/probar_api.sh http://localhost:8080/sicimed
+#   Standalone (H2) : bash docs/probar_api.sh http://localhost:8090
 B="${1:-http://localhost:8090}"
 PASS=0; FAIL=0
 # curl es un binario nativo de Windows: no puede escribir en rutas /tmp de MSYS.
@@ -10,7 +13,11 @@ OUT=$(cygpath -w "$OUT_DIR/resp.json" 2>/dev/null || echo "$OUT_DIR/resp.json")
 
 req() { # metodo ruta [body] [token]
   local metodo="$1" ruta="$2" body="$3" token="$4"
-  local args=(-s -o "$OUT" -w "%{http_code}" -X "$metodo" "$B$ruta")
+  case "$ruta" in
+    http*) url="$ruta" ;;
+    *) url="$B$ruta" ;;
+  esac
+  local args=(-s -o "$OUT" -w "%{http_code}" -X "$metodo" "$url")
   [ -n "$token" ] && args+=(-H "Authorization: Bearer $token")
   [ -n "$body" ] && args+=(-H "Content-Type: application/json" -d "$body")
   CODE=$(curl "${args[@]}")
