@@ -113,7 +113,8 @@ public class CitaServicio {
              !hora.isAfter(HORA_FIN);
              hora = hora.plusMinutes(INTERVALO_MINUTOS)) {
             if (!ocupados.contains(hora)) {
-                libres.add(hora.toString());
+                // Formato HH:mm explícito para evitar problemas con segundos
+                libres.add(String.format("%02d:%02d", hora.getHour(), hora.getMinute()));
             }
         }
         return libres;

@@ -245,13 +245,17 @@ export class ReprogramarCitaComponent implements OnInit {
     }
 
     const v = this.form.getRawValue();
-    const hora = String(v['hora']);
+    let hora = String(v['hora']);
+    // Normalizar a HH:mm (el backend espera este formato)
+    if (hora.length > 5) {
+      hora = hora.substring(0, 5);
+    }
     this.citaService.actualizar(this.citaId, {
       medicoId: v['medicoId'] as number,
       pacienteId: this.pacienteId,
       sedeId: v['sedeId'] as number,
       fecha: String(v['fecha']),
-      hora: hora.length === 5 ? hora + ':00' : hora,
+      hora: hora,
       motivo: String(v['motivo'] ?? '')
     }).subscribe({
       next: () => {
