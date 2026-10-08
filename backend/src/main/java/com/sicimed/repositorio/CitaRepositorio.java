@@ -30,7 +30,6 @@ public interface CitaRepositorio extends JpaRepository<Cita, Long>,
                          @Param("estadoExcluido") EstadoCita estadoExcluido,
                          @Param("excludeId") Long excludeId);
 
-    /** Resuelta por la Named Query "Cita.findHorasOcupadas" declarada en la entidad Cita (S5). */
     List<LocalTime> findHorasOcupadas(@Param("medicoId") Long medicoId,
                                       @Param("fecha") LocalDate fecha,
                                       @Param("cancelado") EstadoCita cancelado);
